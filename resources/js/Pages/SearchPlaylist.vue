@@ -1,0 +1,43 @@
+<script setup>
+import SearchPlaylistCards from '@/Widgets/SearchPlaylistCards.vue';
+import MainLayout from '@/Layouts/MainLayout.vue';
+</script>
+
+<template>
+    <MainLayout>
+        <div class="container">
+            <select class="form-select form-select-lg mb-3 text-center" aria-label="Large select example">
+                <option disabled selected>Select a Radio Station</option>
+                <option value="1">Radio 1</option>
+                <option value="2">Radio 1 Dance</option>
+                <option value="3">Radio 1 Relax</option>
+                <option value="4">Radio 1Xtra</option>
+                <option value="5">Radio 2</option>
+                <option value="6">Radio 3</option>
+            </select>
+        </div>
+
+        <div class="container input-group input-group-lg">
+            <input type="text" class="form-control" aria-label="Sizing example input" placeholder="Name your playlist"
+                aria-describedby="inputGroup-sizing-lg">
+        </div>
+
+        <div class="container">
+            <SearchPlaylistCards v-for="n in 10" :key="n" />
+        </div>
+
+        <div class="row">
+            <div class="col-md-3 offset-md-5">
+                <button id="add-to-spotify" class="btn btn-secondary btn-lg mt-5" src="#">Add to Spotify</button>
+            </div>
+        </div>
+    </MainLayout>
+</template>
+
+
+<style scoped>
+#add-to-spotify {
+    background-color: rgb(5, 180, 34);
+    border-color: rgb(5, 180, 34);
+}
+</style>
