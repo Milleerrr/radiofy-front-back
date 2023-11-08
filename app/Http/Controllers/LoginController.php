@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Login;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -79,5 +81,24 @@ class LoginController extends Controller
     public function redirectToGoogle()
     {
         return Socialite::driver('google')->redirect();
+    }
+
+    public function redirectToSpotifyCallback() {
+        $spotifyUserInfo = Socialite::driver('spotify')->stateless()->user();
+
+        
+        $user = User::updateOrCreate([
+            'id' => $spotifyUserInfo->id,
+        ], [
+            'name' => $spotifyUserInfo->name,
+            'email' => $spotifyUserInfo->email,
+            'spotify_token' => $spotifyUserInfo->token,
+            'spotify_refresh_token' => $spotifyUserInfo->refreshToken,
+        ]);
+
+        Auth::login($user);
+     
+        return redirect('/search');
+
     }
 }

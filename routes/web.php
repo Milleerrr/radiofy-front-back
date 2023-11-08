@@ -41,13 +41,6 @@ Route::get('/login/spotify', [LoginController::class, 'redirectToSpotify'])
 Route::get('/login/google', [LoginController::class, 'redirectToGoogle'])
     ->name('google');
 
-Route::get('/login/spotify/callback', function () {
-    $spotifyUserInfo = Socialite::driver('spotify')->stateless()->user();
-    
-    return json_encode($spotifyUserInfo);
-    // Log::info($spotifyUserInfo);
-
-    // redirect()->route('search');
-});
+Route::get('/login/spotify/callback', [LoginController::class, 'redirectToSpotifyCallback']);
 
 
