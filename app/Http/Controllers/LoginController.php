@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Login;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Laravel\Socialite\Facades\Socialite;
 
 class LoginController extends Controller
 {
@@ -62,5 +63,21 @@ class LoginController extends Controller
     public function destroy(Login $login)
     {
         //
+    }
+
+    /**
+     * Redirect user to Spotify login
+     */
+    public function redirectToSpotify()
+    {
+        return Socialite::driver('spotify')->redirect();
+    }
+
+    /**
+     * Redirect user to Google login
+     */
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')->redirect();
     }
 }

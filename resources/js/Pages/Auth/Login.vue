@@ -4,26 +4,26 @@ import { Head, Link } from '@inertiajs/vue3';
 </script>
 
 <template>
-
     <Head title="Login page" />
 
     <MainLayout>
         <div class="container border shadow mb-5 bg-body-tertiary rounded">
             <div class="row">
                 <div class="col py-3">
-                    <router-link class="navbar-brand" to="/">
-                        <img src="/assets/radiofy.svg" alt="Radiofy"> Radiofy
-                    </router-link>
+                    <Link :href="route('/')" class="navbar-brand" to="/">
+                    <img src="/assets/radiofy.svg" alt="Radiofy"> Radiofy
+                    </Link>
                     <div id="login" class="d-flex flex-column align-items-center">
                         <div class="login-section">
                             <h2>Log in with</h2>
                             <div class="socials my-3">
-                                <Link as="button" type="button" class="social-link">
+                                <a href="/login/google" class="social-link">
                                     <img src="/assets/google-logo.png" alt="Google Logo" class="social-icon">
-                                </Link>
-                                <Link as="button" type="button" class="social-link">
+                                </a>
+                                <a href="/login/spotify" class="social-link">
                                     <img src="/assets/spotify-logo.png" alt="Spotify Logo" class="social-icon">
-                                </Link>
+                                </a>
+
                             </div>
                             <p>Or login in with</p>
                             <hr>

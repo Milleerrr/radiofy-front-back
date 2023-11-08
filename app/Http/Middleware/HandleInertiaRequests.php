@@ -29,7 +29,7 @@ class HandleInertiaRequests extends Middleware
 
         // Auth routes
         'register',
-        'login',
+        // 'login',
         'password.request',
         'password.email',
         'password.reset',

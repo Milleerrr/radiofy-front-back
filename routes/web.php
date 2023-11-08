@@ -30,35 +30,24 @@ Route::get('/', [HomeController::class, 'index'])->name('/');
 // Search page route
 Route::get('/search', [SearchController::class, 'index'])->name('search');
 
+// Login page route
 Route::get('/login', [LoginController::class, 'index'])->name('login');
 
-// See: https://socialiteproviders.com/Spotify/#installation-basic-usage
-// return return Socialite::driver('spotify')->redirect();
-// Route::get('/signin', [...])
+// Spotify redirect login
+Route::get('/login/spotify', [LoginController::class, 'redirectToSpotify'])
+    ->name('spotify');
 
-Route::get('/signin', function () {
-    return Socialite::driver('spotify')->redirect();
+// Google redirect login
+Route::get('/login/google', [LoginController::class, 'redirectToGoogle'])
+    ->name('google');
+
+Route::get('/login/spotify/callback', function () {
+    $spotifyUserInfo = Socialite::driver('spotify')->stateless()->user();
+    
+    return json_encode($spotifyUserInfo);
+    // Log::info($spotifyUserInfo);
+
+    // redirect()->route('search');
 });
 
-// Needs to be configured as your .env SPOTIFY_REDIRECT_URI
-// See: https://socialiteproviders.com/usage/
-// Needs to handle 1. New signin (create a new user model), 2. returning user - reference existing model
-// See: *** https://laravel.com/docs/10.x/socialite#authentication-and-storage
-// Route::get('/signin/spotify', [...])
-
-
-Route::get('/example1', function () {
-    // Render component and pass props
-    return Inertia::render('Example1', [
-        'initialNames' => [
-            'Alice',
-            'Bob',
-            'Carol'
-        ]
-    ]);
-})->name('example1');
-
-Route::get('/example2', function () {
-    return Inertia::render('Example2');
-})->name('example2');
 
