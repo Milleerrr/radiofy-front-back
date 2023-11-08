@@ -7,7 +7,7 @@ import { Link } from '@inertiajs/vue3';
     <nav class="navbar navbar-expand-lg bg-body-tertiary container-fluid mt-4 mb-5">
         <div class="container-fluid">
             <Link :href="route('/')" class="navbar-brand">
-                <img src="/assets/radiofy.svg"> Radiofy
+            <img src="/assets/radiofy.svg"> Radiofy
             </Link>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -19,17 +19,24 @@ import { Link } from '@inertiajs/vue3';
                         <Link class="nav-link hover" aria-current="page" :href="route('search')">Search playlist</Link>
                     </li>
                 </ul>
-                <div class="d-flex" role="search">
-                    <Link v-if="!$page.props.auth.user" :href="route('login')"><button type="button" class="btn btn-primary btn-sm" id="sign-up">Sign up</button></Link>
-                    <span v-else>Logged in as {{ $page.props.auth.user.name }}</span>
-                    <a href="/logout">Logout</a>
-                    <Link v-if="!$page.props.auth.user" type="button" :href="route('login')"><button type="button" class="btn btn-secondary btn-sm">Log in</button></Link>
-                    <a class="nav-link m-1" herf="#">
-                        <svg xmlns="http://www.w3.org/2000/svg" height="1em"
-                            viewBox="0 0 448 512">
-                            <path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z" />
-                        </svg>
-                    </a>
+                <div class="d-flex">
+                    <div v-if="!$page.props.auth.user">
+                        <Link :href="route('login')"><button type="button"
+                            class="btn btn-primary btn-sm" id="sign-up">Sign up</button></Link>
+                        <Link type="button" :href="route('login')"><button type="button"
+                            class="btn btn-secondary btn-sm">Log in</button></Link>
+                    </div>
+                    <div v-else>
+                        <span>Welcome, <strong>{{ $page.props.auth.user.name }}</strong>!</span>
+                        <Link :href="route('logout')"><button type="button"
+                            class="btn btn-outline-danger btn-sm ms-3">Log out</button></Link>
+                        <!-- <a class="nav-link m-1" herf="#">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512">
+                                <path
+                                    d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z" />
+                            </svg>
+                        </a> -->
+                    </div>
                 </div>
             </div>
         </div>
