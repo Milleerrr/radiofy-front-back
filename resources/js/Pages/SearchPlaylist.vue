@@ -1,9 +1,12 @@
 <script setup>
 import SearchPlaylistCards from '@/Widgets/SearchPlaylistCards.vue';
 import MainLayout from '@/Layouts/MainLayout.vue';
+import { Head } from '@inertiajs/vue3';
 </script>
 
 <template>
+    <Head title="Search"/>
+
     <MainLayout>
         <div class="container">
             <select class="form-select form-select-lg mb-3 text-center" aria-label="Large select example">
