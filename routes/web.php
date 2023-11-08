@@ -31,7 +31,7 @@ Route::get('/', [HomeController::class, 'index'])->name('/');
 Route::get('/search', [SearchController::class, 'index'])->name('search');
 
 // Login page route
-Route::get('/login', [LoginController::class, 'index'])->name('login');
+Route::get('/login', [LoginController::class, 'index'])->middleware('guest')->name('login');
 
 // Spotify redirect login
 Route::get('/login/spotify', [LoginController::class, 'redirectToSpotify'])

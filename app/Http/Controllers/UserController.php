@@ -16,6 +16,7 @@ class UserController extends Controller
         $user->password = $request->password;
         $user->spotify_token = $request->token;
         $user->spotify_refresh_token = $request->refreshToken;
+        $user->spotify_id = $request->spotify_id;
         // then save
         $user->save();
 

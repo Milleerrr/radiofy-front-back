@@ -1,5 +1,6 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
+import { Link } from '@inertiajs/vue3';
+
 </script>
 
 <template>
@@ -19,8 +20,10 @@ import { Head, Link } from '@inertiajs/vue3';
                     </li>
                 </ul>
                 <div class="d-flex" role="search">
-                    <Link :href="route('login')"><button type="button" class="btn btn-primary btn-sm" id="sign-up">Sign up</button></Link>
-                    <Link type="button" :href="route('login')"><button type="button" class="btn btn-secondary btn-sm">Log in</button></Link>
+                    <Link v-if="!$page.props.auth.user" :href="route('login')"><button type="button" class="btn btn-primary btn-sm" id="sign-up">Sign up</button></Link>
+                    <span v-else>Logged in as {{ $page.props.auth.user.name }}</span>
+                    <a href="/logout">Logout</a>
+                    <Link v-if="!$page.props.auth.user" type="button" :href="route('login')"><button type="button" class="btn btn-secondary btn-sm">Log in</button></Link>
                     <a class="nav-link m-1" herf="#">
                         <svg xmlns="http://www.w3.org/2000/svg" height="1em"
                             viewBox="0 0 448 512">

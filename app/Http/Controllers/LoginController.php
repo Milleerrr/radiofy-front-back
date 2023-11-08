@@ -88,7 +88,7 @@ class LoginController extends Controller
 
         
         $user = User::updateOrCreate([
-            'id' => $spotifyUserInfo->id,
+            'spotify_id' => $spotifyUserInfo->id,
         ], [
             'name' => $spotifyUserInfo->name,
             'email' => $spotifyUserInfo->email,
@@ -97,7 +97,7 @@ class LoginController extends Controller
         ]);
 
         Auth::login($user);
-     
+
         return redirect('/search');
 
     }
