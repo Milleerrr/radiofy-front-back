@@ -9,6 +9,8 @@ import { Head } from '@inertiajs/vue3';
 let selectedStation = ref('');
 // Save an array of songs with titles and artist/s
 let songs = ref([]);
+let playlistName = ref('');
+
 
 const fetchPlaylist = async () => {
     const response = await fetch(`./data/${selectedStation.value}.json`);
@@ -16,6 +18,23 @@ const fetchPlaylist = async () => {
     songs.value = data.Radio1Dance;
 }
 
+const addToSpotify = async () => {
+  // You will call your backend endpoint that handles Spotify API interaction here.
+  // The backend will handle the OAuth flow and make the API request to create a playlist.
+  const response = await fetch('/api/spotify/create-playlist', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      // Include any necessary headers, like an authorization token.
+    },
+    body: JSON.stringify({
+      name: playlistName.value,
+      // Include other data if needed, like the user's ID or songs to add to the playlist.
+    }),
+  });
+  const data = await response.json();
+  // Handle the response, check if the playlist was created successfully, etc.
+};
 
 </script>
 
@@ -37,8 +56,7 @@ const fetchPlaylist = async () => {
                     <option value="6">Radio 3</option>
                 </select>
                 <div class="container input-group input-group-lg">
-                    <input type="text" class="form-control" aria-label="Sizing example input"
-                        placeholder="Name your playlist" aria-describedby="inputGroup-sizing-lg">
+                    <input v-model="playlistName" type="text" class="form-control" placeholder="Name your playlist" aria-describedby="inputGroup-sizing-lg">
                 </div>
                 <div class="col-lg-3 offset-5 mt-3">
                     <button class="btn btn-outline-success px-5">Search</button>
@@ -52,7 +70,7 @@ const fetchPlaylist = async () => {
 
         <div class="row">
             <div class="col-md-3 offset-md-5">
-                <button id="add-to-spotify" class="btn btn-secondary btn-lg mt-5" src="#">Add to Spotify</button>
+                <button id="add-to-spotify" class="btn btn-secondary btn-lg mt-5" @click="addToSpotify">Add to Spotify</button>
             </div>
         </div>
     </MainLayout>

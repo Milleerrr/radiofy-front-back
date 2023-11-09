@@ -94,6 +94,7 @@ class LoginController extends Controller
             'email' => $spotifyUserInfo->email,
             'spotify_token' => $spotifyUserInfo->token,
             'spotify_refresh_token' => $spotifyUserInfo->refreshToken,
+            'token_expires_at' => now()->addSeconds($spotifyUserInfo->expiresIn),
         ]);
 
         Auth::login($user);

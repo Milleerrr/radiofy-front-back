@@ -17,6 +17,7 @@ class UserController extends Controller
         $user->spotify_token = $request->token;
         $user->spotify_refresh_token = $request->refreshToken;
         $user->spotify_id = $request->spotify_id;
+        $user->token_expires_at = $request->token_expires_in;
         // then save
         $user->save();
 
