@@ -5,24 +5,28 @@ import { Head } from '@inertiajs/vue3';
 </script>
 
 <template>
-    <Head title="Search"/>
+    <Head title="Search" />
 
     <MainLayout>
         <div class="container">
-            <select class="form-select form-select-lg mb-3 text-center" aria-label="Large select example">
-                <option disabled selected>Select a Radio Station</option>
-                <option value="1">Radio 1</option>
-                <option value="2">Radio 1 Dance</option>
-                <option value="3">Radio 1 Relax</option>
-                <option value="4">Radio 1Xtra</option>
-                <option value="5">Radio 2</option>
-                <option value="6">Radio 3</option>
-            </select>
-        </div>
-
-        <div class="container input-group input-group-lg">
-            <input type="text" class="form-control" aria-label="Sizing example input" placeholder="Name your playlist"
-                aria-describedby="inputGroup-sizing-lg">
+            <form>
+                <select class="form-select form-select-lg mb-3 text-center" aria-label="Large select example">
+                    <option disabled selected>Select a Radio Station</option>
+                    <option value="1">Radio 1</option>
+                    <option value="2">Radio 1 Dance</option>
+                    <option value="3">Radio 1 Relax</option>
+                    <option value="4">Radio 1Xtra</option>
+                    <option value="5">Radio 2</option>
+                    <option value="6">Radio 3</option>
+                </select>
+                <div class="container input-group input-group-lg">
+                    <input type="text" class="form-control" aria-label="Sizing example input"
+                        placeholder="Name your playlist" aria-describedby="inputGroup-sizing-lg">
+                </div>
+                <div class="col-lg-3 offset-5 mt-3">
+                    <button class="btn btn-outline-success px-5">Search</button>
+                </div>
+            </form>
         </div>
 
         <div class="container">
