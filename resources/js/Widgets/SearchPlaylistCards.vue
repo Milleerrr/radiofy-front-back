@@ -24,7 +24,7 @@ defineProps(['title', 'artist']);
             <div class="col-md-2">
                 <div class="checkbox-wrapper-12">
                     <div class="cbx">
-                        <input id="cbx-12" type="checkbox" />
+                        <input id="cbx-12" type="checkbox" checked/>
                         <label for="cbx-12"></label>
                         <svg width="15" height="14" viewbox="0 0 15 14" fill="none">
                             <path d="M2 8.36364L6.23077 12L13 2"></path>

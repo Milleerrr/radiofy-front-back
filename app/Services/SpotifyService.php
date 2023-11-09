@@ -14,13 +14,36 @@ class SpotifyService
         $this->client = new Client();
     }
 
+    public function createAndFillPlaylist(User $user, $playlistName, array $tracksInfo)
+    {
+        $accessToken = $this->getSpotifyAccessToken($user);
+
+        // Create a new Spotify playlist
+        $playlist = $this->createSpotifyPlaylist($accessToken, $user->spotify_id, $playlistName);
+
+        // Search for each track and collect their Spotify URIs
+        $trackUris = [];
+        foreach ($tracksInfo as $track) {
+            $searchResult = $this->searchTrackOnSpotify($accessToken, $track['artist'], $track['title']);
+            if ($searchResult) {
+                $trackUris[] = $searchResult['uri'];
+            }
+        }
+
+        // Add tracks to the newly created Spotify playlist
+        if (!empty($trackUris)) {
+            $this->addTracksToPlaylist($accessToken, $playlist['id'], $trackUris);
+        }
+
+        return $playlist;
+    }
+
     public function getSpotifyAccessToken(User $user)
     {
         // Check if the current access token is still valid
         if ($user->tokenHasExpired()) {
             // Access token has expired, use the refresh token to get a new one
-            $client = new \GuzzleHttp\Client();
-            $response = $client->request('POST', 'https://accounts.spotify.com/api/token', [
+            $response = $this->client->request('POST', 'https://accounts.spotify.com/api/token', [
                 'form_params' => [
                     'grant_type' => 'refresh_token',
                     'refresh_token' => $user->spotify_refresh_token,
@@ -42,5 +65,62 @@ class SpotifyService
 
         // Access token is still valid, return it
         return $user->spotify_token;
+    }
+
+    private function createSpotifyPlaylist($accessToken, $userId, $playlistName)
+    {
+        $headers = [
+            'Authorization' => 'Bearer ' . $accessToken,
+            'Content-Type'  => 'application/json',
+        ];
+
+        $body = json_encode([
+            'name' => $playlistName,
+            'public' => false // Set to true if the playlist should be public
+        ]);
+
+        $response = $this->client->request('POST', "https://api.spotify.com/v1/users/{$userId}/playlists", [
+            'headers' => $headers,
+            'body' => $body
+        ]);
+
+        return json_decode($response->getBody(), true);
+    }
+
+
+    public function searchTrackOnSpotify($accessToken, $artist, $trackTitle)
+    {
+        $headers = [
+            'Authorization' => 'Bearer ' . $accessToken,
+            'Content-Type'  => 'application/json',
+        ];
+
+        $query = http_build_query([
+            'q' => "artist:\"{$artist}\" track:\"{$trackTitle}\"",
+            'type' => 'track',
+            'limit' => 1
+        ]);
+
+        $response = $this->client->request('GET', "https://api.spotify.com/v1/search?{$query}", [
+            'headers' => $headers
+        ]);
+
+        $searchResults = json_decode($response->getBody(), true);
+
+        return $searchResults['tracks']['items'][0] ?? null; // Return the first match or null if not found
+    }
+    private function addTracksToPlaylist($accessToken, $playlistId, array $trackUris)
+    {
+        $headers = [
+            'Authorization' => 'Bearer ' . $accessToken,
+            'Content-Type'  => 'application/json',
+        ];
+
+        $body = json_encode(['uris' => $trackUris]);
+
+        $this->client->request('POST', "https://api.spotify.com/v1/playlists/{$playlistId}/tracks", [
+            'headers' => $headers,
+            'body' => $body
+        ]);
     }
 }

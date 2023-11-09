@@ -46,4 +46,10 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    // Check if access token has expired
+    public function tokenHasExpired()
+    {
+        return $this->token_expires_at <= now();
+    }
 }

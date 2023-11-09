@@ -43,4 +43,3 @@ Route::get('/login/google', [LoginController::class, 'redirectToGoogle'])
 
 Route::get('/login/spotify/callback', [LoginController::class, 'redirectToSpotifyCallback']);
 
-
