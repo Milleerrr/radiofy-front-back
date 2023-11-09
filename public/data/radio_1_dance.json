@@ -1,0 +1,54 @@
+{
+    "Radio1Dance": [
+        {
+            "id": 1,
+            "artist": "Dom Dolla",
+            "title": "Saving Up"
+        },
+        {
+            "id": 2,
+            "artist": "Jamie Jones & Darius Syrossian",
+            "title": "Rushing"
+        },
+        {
+            "id": 3,
+            "artist": "Patrick Prins",
+            "title": "Le Voie Le Soleil (Solardo Remix)"
+        },
+        {
+            "id": 4,
+            "artist": "Chase & Status feat. Moko",
+            "title": "Count On Me"
+        },
+        {
+            "id": 5,
+            "artist": "Swedish House Mafia",
+            "title": "Ray of Solar"
+        },
+        {
+            "id": 6,
+            "artist": "Sofi Tukker & Gorgon City",
+            "title": "House Arrest"
+        },
+        {
+            "id": 7,
+            "artist": "ESSEL",
+            "title": "The Edge"
+        },
+        {
+            "id": 8,
+            "artist": "Chris Lake & Aluna",
+            "title": "More Baby"
+        },
+        {
+            "id": 9,
+            "artist": "Kelis",
+            "title": "Milkshake 20 (Alex Wann Remix)"
+        },
+        {
+            "id": 10,
+            "artist": "Nadia Ali",
+            "title": "Rapture"
+        }
+    ]
+}
