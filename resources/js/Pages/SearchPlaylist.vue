@@ -21,24 +21,27 @@ const fetchPlaylist = async () => {
 }
 
 const createPlaylistOnSpotify = async () => {
-    if (!playlistName.value || !songs.value.length) {
-        alert('Please enter a playlist name and select songs.');
+    if (!playlistName.value) {
+        alert('Please enter a playlist name.');
         return;
     }
 
     try {
-        const response = await axios.post(route('spotify.add-to-playlist'), {
-            name: playlistName.value,
-            songs: songs.value.map(song => ({ id: song.id, artist: song.artist, title: song.title }))
+        const tokenResponse = await axios.post('api/spotify/get-token');
+        console.log('Spotify Access Token:', tokenResponse.data.access_token);
+
+        const playlistResponse = await axios.post('api/spotify/create-playlist', {
+            name: playlistName.value
         });
 
-        console.log(response.data);
+        console.log('Created Playlist Name:', playlistResponse.data.playlist_name);
         // Handle success, maybe redirect to the Spotify playlist or show a success message
     } catch (error) {
-        console.error('Error adding playlist to Spotify:', error);
+        console.error('Error in playlist creation:', error.response.data);
         // Handle errors, maybe show an error message to the user
     }
 };
+
 
 </script>
 
@@ -52,12 +55,12 @@ const createPlaylistOnSpotify = async () => {
                 <select v-model="selectedStation" class="form-select form-select-lg mb-3 text-center"
                     aria-label="Large select example">
                     <option disabled selected>Select a Radio Station</option>
-                    <option value="1">Radio 1</option>
+                    <option value="radio_1">Radio 1</option>
                     <option value="radio_1_dance">Radio 1 Dance</option>
-                    <option value="3">Radio 1 Relax</option>
-                    <option value="4">Radio 1Xtra</option>
-                    <option value="5">Radio 2</option>
-                    <option value="6">Radio 3</option>
+                    <option value="radio_1_relax">Radio 1 Relax</option>
+                    <option value="radio_1_xtra">Radio 1Xtra</option>
+                    <option value="radio_2">Radio 2</option>
+                    <option value="radio_3">Radio 3</option>
                 </select>
                 <div class="container input-group input-group-lg">
                     <input v-model="playlistName" type="text" class="form-control" placeholder="Name your playlist"

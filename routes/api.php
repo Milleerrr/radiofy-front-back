@@ -3,7 +3,7 @@
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\SpotifyController;
+use App\Http\Controllers\SpotifyServiceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,5 +28,9 @@ Route::middleware('auth:sanctum')->group(function () {
 }); 
 
 // Then create playlists once tracks have been found 
-Route::post('/spotify/add-to-spotify', [SpotifyController::class, 'addToSpotify'])
-    ->name('spotify.add-to-playlist');
+Route::post('/spotify/get-token', [SpotifyServiceController::class, 'getSpotifyToken'])
+    ->name('spotify.get-token');
+
+Route::post('/spotify/create-playlist', [SpotifyServiceController::class, 'createPlaylist'])
+    ->name('spotify.create-playlist');
+

@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Services\SpotifyService;
 
-class SpotifyController extends Controller
+class SpotifyServiceController extends Controller
 {
     protected $spotifyService;
 
@@ -17,31 +17,42 @@ class SpotifyController extends Controller
 
 
     // This endpoint will handle creating a playlist and adding tracks to it.
-    public function addToSpotify(Request $request)
+    public function getSpotifyToken(Request $request)
     {
         $user = Auth::user();
         if (!$user) {
-            return response()->json(['message' => 'Not authenticated'], 401);
+            return response()->json(['message' => 'User not authenticated'], 401);
         }
 
-        // Validate the request inputs
+        // Retrieve the access token using the Spotify service
+        $accessToken = $this->spotifyService->getSpotifyAccessToken($user);
+
+        // Return the access token in the response
+        return response()->json([
+            'message' => 'Access token retrieved successfully!',
+            'access_token' => $accessToken
+        ]);
+    }
+
+    public function createPlaylist(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
-            'songs' => 'required|array',
-            'songs.*.id' => 'required|integer',
-            'songs.*.artist' => 'required|string|max:255',
-            'songs.*.title' => 'required|string|max:255',
         ]);
 
-        $playlistName = $request->input('playlistName');
-        $tracksInfo = $request->input('songs'); // Array of tracks with 'artist' and 'title'
+        $playlistName = $request->input('name');
 
-        // Create the playlist and add the tracks in one operation
-        $playlist = $this->spotifyService->createAndFillPlaylist($user, $playlistName, $tracksInfo);
+        // Call the service method to create a playlist
+        $createdPlaylistName = $this->spotifyService->createPlaylist($user, $playlistName);
 
         return response()->json([
-            'message' => 'Playlist created and songs added successfully!',
-            'playlist' => $playlist
+            'message' => 'Playlist created successfully!',
+            'playlist_name' => $createdPlaylistName
         ]);
     }
 }

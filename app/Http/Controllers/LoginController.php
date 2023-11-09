@@ -72,8 +72,21 @@ class LoginController extends Controller
      */
     public function redirectToSpotify()
     {
-        return Socialite::driver('spotify')->redirect();
+        // Define the scopes that your application needs.
+        // This is needed for the authorsiation to allow my app
+        // to perform actions on user's Spotify account
+        $scopes = [
+            'playlist-modify-public',
+            'playlist-modify-private',
+            // Add other scopes your application requires
+        ];
+
+        // Redirect the user to the Spotify authentication page with the necessary scopes
+        return Socialite::driver('spotify')
+            ->scopes($scopes) // Pass the scopes array to the scopes method
+            ->redirect();
     }
+
 
     /**
      * Redirect user to Google login
@@ -83,10 +96,11 @@ class LoginController extends Controller
         return Socialite::driver('google')->redirect();
     }
 
-    public function redirectToSpotifyCallback() {
+    public function redirectToSpotifyCallback()
+    {
         $spotifyUserInfo = Socialite::driver('spotify')->stateless()->user();
 
-        
+
         $user = User::updateOrCreate([
             'spotify_id' => $spotifyUserInfo->id,
         ], [
@@ -100,6 +114,5 @@ class LoginController extends Controller
         Auth::login($user);
 
         return redirect('/search');
-
     }
 }
