@@ -1,4 +1,9 @@
 <script setup>
+import { defineProps} from 'vue';
+
+// Defining props coming in
+defineProps(['title', 'artist']);
+
 </script>
 
 <template>
@@ -8,9 +13,9 @@
                 <img id="song-img" class="rounded" src="/assets/pinkfloyd.png">
             </div>
             <div class="col-md-5">
-                <p>Song name</p>
-                <p>Artist/s</p>
-                <p>Album name</p>
+                <p>{{title}}</p>
+                <p>{{artist}}</p>
+                <!-- <p>Album name</p> -->
                 <audio controls autoplay>
                     <source type="audio/mp3">
                     Your browser does not support the audio element.

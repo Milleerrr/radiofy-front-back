@@ -45,14 +45,10 @@ const fetchPlaylist = async () => {
                 </div>
             </form>
         </div>
-        <ul>
-            <li v-for="song in songs" :key="song.id">
-                {{ song.title }} by {{ song.artist }}
-            </li>
-        </ul>
-        <!-- <div class="container">
-            <SearchPlaylistCards v-for="n in 5" :key="n" />
-        </div> -->
+
+        <div class="container">
+            <SearchPlaylistCards v-for="song in songs" :key="song.id" :title="song.title" :artist="song.artist" />
+        </div>
 
         <div class="row">
             <div class="col-md-3 offset-md-5">
