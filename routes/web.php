@@ -25,13 +25,18 @@ require __DIR__.'/defaults.php';
 */
 
 // Home page route
-Route::get('/', [HomeController::class, 'index'])->name('/');
+Route::get('/', [HomeController::class, 'index'])
+    ->name('/');
 
 // Search page route
-Route::get('/search', [SearchController::class, 'index'])->name('search');
+Route::get('/search', [SearchController::class, 'index'])
+    ->middleware('auth')
+    ->name('search');
 
 // Login page route
-Route::get('/login', [LoginController::class, 'index'])->middleware('guest')->name('login');
+Route::get('/login', [LoginController::class, 'index'])
+    ->middleware('guest')
+    ->name('login');
 
 // Spotify redirect login
 Route::get('/login/spotify', [LoginController::class, 'redirectToSpotify'])
