@@ -11,8 +11,6 @@ let selectedStation = ref('');
 // Save an array of songs with titles and artist/s
 let songs = ref([]);
 let playlistName = ref('');
-const props = usePage().props;
-
 
 const fetchPlaylist = async () => {
     const response = await fetch(`./data/${selectedStation.value}.json`);
@@ -20,68 +18,23 @@ const fetchPlaylist = async () => {
     songs.value = data.Radio1Dance;
 }
 
-const createPlaylistOnSpotify = async () => {
+const addToSpotify = async () => {
     if (!playlistName.value) {
         alert('Please enter a playlist name.');
         return;
     }
 
     try {
-        const tokenResponse = await axios.post('api/spotify/get-token');
-        const accessToken = tokenResponse.data.access_token;
-        console.log('Spotify Access Token:', accessToken);
-
-        const playlistResponse = await axios.post('api/spotify/create-playlist', {
-            name: playlistName.value
+        const response = await axios.post('api/spotify/add-to-spotify', {
+            playlistName: playlistName.value,
+            tracks: songs.value
         });
-        const playlistId = playlistResponse.data.playlist_name;
-        console.log('Created Playlist Id:', playlistId);
-
-        let trackUris = [];
-        for (const song of songs.value) {
-            const trackResponse = await searchTrackOnSpotify(song.artist, song.title);
-            if (trackResponse && trackResponse.data && trackResponse.data.uri) {
-                trackUris.push(trackResponse.data.uri);
-            }
-        }
-
-        if (trackUris.length > 0) {
-            await addTracksToPlaylistOnSpotify(playlistId, trackUris);
-        }
-
-        // Handle success, maybe redirect to the Spotify playlist or show a success message
+        alert('Hooray Playlist created');
+        console.log(response.data.message); // Assuming the backend sends back a success message
+        // Handle success here
     } catch (error) {
-        console.error('Error in playlist creation or track search:', error.response.data);
-        // Handle errors, maybe show an error message to the user
-    }
-};
-
-const addTracksToPlaylistOnSpotify = async (playlistId, trackUris) => {
-    try {
-        await axios.post('api/spotify/add-tracks', {
-            playlist_id: playlistId,
-            track_uris: trackUris
-        });
-        console.log('Tracks added to the playlist successfully');
-    } catch (error) {
-        console.error('Error adding tracks to the playlist:', error.response.data);
-        // Handle errors, maybe show an error message to the user
-    }
-};
-
-
-const searchTrackOnSpotify = async (artist, trackTitle) => {
-    try {
-        const trackResponse = await axios.post('api/spotify/search-track', {
-            artist: artist,
-            trackTitle: trackTitle
-        });
-
-        console.log('Search Results:', trackResponse.data.uri);
-        return trackResponse; // Return the response so the URI can be used
-    } catch (error) {
-        console.error('Error in searching track:', error.response.data);
-        // Handle errors, maybe show an error message to the user
+        console.error('Error adding to Spotify:', error.response.data);
+        // Handle error here
     }
 };
 
@@ -120,7 +73,7 @@ const searchTrackOnSpotify = async (artist, trackTitle) => {
 
         <div class="row">
             <div class="col-md-3 offset-md-5">
-                <button id="add-to-spotify" class="btn btn-secondary btn-lg mt-5" @click="createPlaylistOnSpotify">Add to Spotify</button>
+                <button id="add-to-spotify" class="btn btn-secondary btn-lg mt-5" @click="addToSpotify">Add to Spotify</button>
             </div>
         </div>
     </MainLayout>

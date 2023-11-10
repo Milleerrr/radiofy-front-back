@@ -28,14 +28,6 @@ Route::middleware('auth:sanctum')->group(function () {
 }); 
 
 // Then create playlists once tracks have been found 
-Route::post('/spotify/get-token', [SpotifyServiceController::class, 'getSpotifyToken'])
-    ->name('spotify.get-token');
+Route::post('/spotify/add-to-spotify', [SpotifyServiceController::class, 'addToSpotify'])
+    ->name('spotify.add-to-spotify');
 
-Route::post('/spotify/create-playlist', [SpotifyServiceController::class, 'createPlaylist'])
-    ->name('spotify.create-playlist');
-
-Route::post('/spotify/search-track', [SpotifyServiceController::class, 'searchTracks'])
-    ->name('spotify.search-track');
-
-Route::post('/spotify/add-tracks', [SpotifyServiceController::class, 'addTracks'])
-    ->name('spotify.add-tracks');

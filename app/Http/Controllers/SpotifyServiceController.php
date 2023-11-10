@@ -15,6 +15,33 @@ class SpotifyServiceController extends Controller
         $this->spotifyService = $spotifyService;
     }
 
+    public function addToSpotify(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
+
+        // You would validate your request here
+
+        $accessToken = $this->spotifyService->getSpotifyAccessToken($user);
+        $playlistId = $this->spotifyService->createPlaylist($user, $request->input('playlistName'));
+
+        $tracks = $request->input('tracks'); // 'tracks' should be an array of ['artist' => '', 'title' => '']
+        $trackUris = array_map(function ($track) use ($accessToken) {
+            $searchResults = $this->spotifyService->searchTrackOnSpotify($accessToken, $track['artist'], $track['title']);
+            return $searchResults['uri'] ?? null;
+        }, $tracks);
+
+        $trackUris = array_filter($trackUris); // Remove any null values
+
+        if (count($trackUris) > 0) {
+            $this->spotifyService->addTracksToPlaylist($accessToken, $playlistId, $trackUris);
+        }
+
+        return response()->json(['message' => 'Playlist created and tracks added successfully']);
+    }
+
 
     // This endpoint will handle creating a playlist and adding tracks to it.
     public function getSpotifyToken(Request $request)
