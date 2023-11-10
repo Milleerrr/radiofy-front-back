@@ -1,8 +1,15 @@
 <script setup>
-import { defineProps} from 'vue';
+import { ref, defineProps, defineEmits, watchEffect } from 'vue';
 
-// Defining props coming in
-defineProps(['title', 'artist']);
+const props = defineProps(['title', 'artist', 'checked']);
+const emits = defineEmits(['update:checked']);
+
+// Use 'checked' prop with v-model
+const isChecked = ref(props.checked);
+
+watchEffect(() => {
+    isChecked.value = props.checked; // Ensure isChecked is reactive to prop changes
+});
 
 </script>
 
@@ -13,8 +20,8 @@ defineProps(['title', 'artist']);
                 <img id="song-img" class="rounded" src="/assets/pinkfloyd.png">
             </div>
             <div class="col-md-5">
-                <p>{{title}}</p>
-                <p>{{artist}}</p>
+                <p>{{ title }}</p>
+                <p>{{ artist }}</p>
                 <!-- <p>Album name</p> -->
                 <audio controls autoplay>
                     <source type="audio/mp3">
@@ -24,7 +31,8 @@ defineProps(['title', 'artist']);
             <div class="col-md-2">
                 <div class="checkbox-wrapper-12">
                     <div class="cbx">
-                        <input id="cbx-12" type="checkbox" checked/>
+                        <input id="cbx-12" type="checkbox" v-model="isChecked"
+                            @change="$emit('update:checked')"/>
                         <label for="cbx-12"></label>
                         <svg width="15" height="14" viewbox="0 0 15 14" fill="none">
                             <path d="M2 8.36364L6.23077 12L13 2"></path>
@@ -187,6 +195,5 @@ defineProps(['title', 'artist']);
         box-shadow: 0 -36px 0 -10px transparent, 32px -16px 0 -10px transparent, 32px 16px 0 -10px transparent, 0 36px 0 -10px transparent, -32px 16px 0 -10px transparent, -32px -16px 0 -10px transparent;
     }
 }
-
 </style>
   
