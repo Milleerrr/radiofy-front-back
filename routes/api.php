@@ -34,3 +34,6 @@ Route::post('/spotify/get-token', [SpotifyServiceController::class, 'getSpotifyT
 Route::post('/spotify/create-playlist', [SpotifyServiceController::class, 'createPlaylist'])
     ->name('spotify.create-playlist');
 
+Route::post('/spotify/search-track', [SpotifyServiceController::class, 'searchTracks'])
+    ->name('spotify.search-track');
+

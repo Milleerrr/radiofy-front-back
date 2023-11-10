@@ -14,60 +14,6 @@ class SpotifyService
         $this->client = new Client();
     }
 
-    // public function createAndFillPlaylist(User $user, $playlistName, array $tracksInfo)
-    // {
-    //     $accessToken = $this->getSpotifyAccessToken($user);
-
-    // Create a new Spotify playlist
-    // $playlist = $this->createSpotifyPlaylist($accessToken, $user->spotify_id, $playlistName);
-
-
-
-    // // Search for each track and collect their Spotify URIs
-    // $trackUris = [];
-    // foreach ($tracksInfo as $track) {
-    //     $searchResult = $this->searchTrackOnSpotify($accessToken, $track['artist'], $track['title']);
-    //     if ($searchResult) {
-    //         $trackUris[] = $searchResult['uri'];
-    //     }
-    // }
-
-    // // Add tracks to the newly created Spotify playlist
-    // if (!empty($trackUris)) {
-    //     $this->addTracksToPlaylist($accessToken, $playlist['id'], $trackUris);
-    // }
-
-    // return $playlist;
-    // }
-
-
-    public function createPlaylist(User $user, $playlistName)
-    {
-        $accessToken = $this->getSpotifyAccessToken($user);
-
-        // Assuming the token has not expired and is correctly retrieved
-        $headers = [
-            'Authorization' => 'Bearer ' . $accessToken,
-            'Content-Type'  => 'application/json',
-        ];
-
-        $body = json_encode([
-            'name' => $playlistName,
-            'description' => 'Created via my app', // You can customize this
-            'public' => false // Set to true if you want the playlist to be public
-        ]);
-
-        // Make the POST request to create a new playlist
-        $response = $this->client->request('POST', "https://api.spotify.com/v1/users/{$user->spotify_id}/playlists", [
-            'headers' => $headers,
-            'body' => $body
-        ]);
-
-        $playlist = json_decode($response->getBody(), true);
-
-        return $playlist['name']; // Return the name of the created playlist
-    }
-
     public function getSpotifyAccessToken(User $user)
     {
         // Check if the current access token is still valid
@@ -97,6 +43,33 @@ class SpotifyService
         return $user->spotify_token;
     }
 
+    public function createPlaylist(User $user, $playlistName)
+    {
+        $accessToken = $this->getSpotifyAccessToken($user);
+
+        // Assuming the token has not expired and is correctly retrieved
+        $headers = [
+            'Authorization' => 'Bearer ' . $accessToken,
+            'Content-Type'  => 'application/json',
+        ];
+
+        $body = json_encode([
+            'name' => $playlistName,
+            'description' => 'Created via my app', // You can customize this
+            'public' => false // Set to true if you want the playlist to be public
+        ]);
+
+        // Make the POST request to create a new playlist
+        $response = $this->client->request('POST', "https://api.spotify.com/v1/users/{$user->spotify_id}/playlists", [
+            'headers' => $headers,
+            'body' => $body
+        ]);
+
+        $playlist = json_decode($response->getBody(), true);
+
+        return $playlist['id']; // Return the id of the playlist object
+    }
+
     public function searchTrackOnSpotify($accessToken, $artist, $trackTitle)
     {
         $headers = [
@@ -105,7 +78,7 @@ class SpotifyService
         ];
 
         $query = http_build_query([
-            'q' => "artist:\"{$artist}\" track:\"{$trackTitle}\"",
+            'q' => "{$artist} {$trackTitle}",
             'type' => 'track',
             'limit' => 1
         ]);

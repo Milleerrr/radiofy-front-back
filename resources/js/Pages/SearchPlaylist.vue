@@ -33,15 +33,34 @@ const createPlaylistOnSpotify = async () => {
         const playlistResponse = await axios.post('api/spotify/create-playlist', {
             name: playlistName.value
         });
+        console.log('Created Playlist Id:', playlistResponse.data.playlist_name);
 
-        console.log('Created Playlist Name:', playlistResponse.data.playlist_name);
+        // Here, we iterate over the songs and search for each on Spotify
+        for (const song of songs.value) {
+            await searchTrackOnSpotify(song.artist, song.title);
+        }
+
         // Handle success, maybe redirect to the Spotify playlist or show a success message
     } catch (error) {
-        console.error('Error in playlist creation:', error.response.data);
+        console.error('Error in playlist creation or track search:', error.response.data);
         // Handle errors, maybe show an error message to the user
     }
 };
 
+const searchTrackOnSpotify = async (artist, trackTitle) => {
+    try {
+        const trackResponse = await axios.post('api/spotify/search-track', {
+            artist: artist,
+            trackTitle: trackTitle
+        });
+
+        console.log('Search Results:', trackResponse.data);
+        // You can do more with the search results here, like displaying them in your component.
+    } catch (error) {
+        console.error('Error in searching track:', error.response.data);
+        // Handle errors, maybe show an error message to the user
+    }
+};
 
 </script>
 
@@ -78,8 +97,7 @@ const createPlaylistOnSpotify = async () => {
 
         <div class="row">
             <div class="col-md-3 offset-md-5">
-                <button id="add-to-spotify" class="btn btn-secondary btn-lg mt-5" @click="createPlaylistOnSpotify">Add to
-                    Spotify</button>
+                <button id="add-to-spotify" class="btn btn-secondary btn-lg mt-5" @click="createPlaylistOnSpotify">Add to Spotify</button>
             </div>
         </div>
     </MainLayout>
