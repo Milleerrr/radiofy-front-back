@@ -91,18 +91,20 @@ class SpotifyService
 
         return $searchResults['tracks']['items'][0] ?? null; // Return the first match or null if not found
     }
-    private function addTracksToPlaylist($accessToken, $playlistId, array $trackUris)
+    public function addTracksToPlaylist($accessToken, $playlistId, $trackUris)
     {
         $headers = [
             'Authorization' => 'Bearer ' . $accessToken,
-            'Content-Type'  => 'application/json',
+            'Content-Type' => 'application/json',
         ];
 
         $body = json_encode(['uris' => $trackUris]);
 
-        $this->client->request('POST', "https://api.spotify.com/v1/playlists/{$playlistId}/tracks", [
+        $response = $this->client->request('POST', "https://api.spotify.com/v1/playlists/{$playlistId}/tracks", [
             'headers' => $headers,
-            'body' => $body
+            'body' => $body,
         ]);
+
+        return json_decode($response->getBody()->getContents(), true);
     }
 }

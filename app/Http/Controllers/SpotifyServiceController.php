@@ -83,4 +83,20 @@ class SpotifyServiceController extends Controller
         // For now, we'll just return it.
         return response()->json($track);
     }
+
+    public function addTracks(Request $request)
+    {
+        $user = Auth::user();
+        $accessToken = $this->spotifyService->getSpotifyAccessToken($user);
+        $playlistId = $request->input('playlist_id');
+        $trackUris = $request->input('track_uris');
+
+        $result = $this->spotifyService->addTracksToPlaylist($accessToken, $playlistId, $trackUris);
+
+        if ($result) {
+            return response()->json(['message' => 'Tracks added successfully']);
+        } else {
+            return response()->json(['message' => 'An error occurred'], 500);
+        }
+    }
 }

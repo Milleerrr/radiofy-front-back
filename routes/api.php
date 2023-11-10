@@ -37,3 +37,5 @@ Route::post('/spotify/create-playlist', [SpotifyServiceController::class, 'creat
 Route::post('/spotify/search-track', [SpotifyServiceController::class, 'searchTracks'])
     ->name('spotify.search-track');
 
+Route::post('/spotify/add-tracks', [SpotifyServiceController::class, 'addTracks'])
+    ->name('spotify.add-tracks');

@@ -28,16 +28,25 @@ const createPlaylistOnSpotify = async () => {
 
     try {
         const tokenResponse = await axios.post('api/spotify/get-token');
-        console.log('Spotify Access Token:', tokenResponse.data.access_token);
+        const accessToken = tokenResponse.data.access_token;
+        console.log('Spotify Access Token:', accessToken);
 
         const playlistResponse = await axios.post('api/spotify/create-playlist', {
             name: playlistName.value
         });
-        console.log('Created Playlist Id:', playlistResponse.data.playlist_name);
+        const playlistId = playlistResponse.data.playlist_name;
+        console.log('Created Playlist Id:', playlistId);
 
-        // Here, we iterate over the songs and search for each on Spotify
+        let trackUris = [];
         for (const song of songs.value) {
-            await searchTrackOnSpotify(song.artist, song.title);
+            const trackResponse = await searchTrackOnSpotify(song.artist, song.title);
+            if (trackResponse && trackResponse.data && trackResponse.data.uri) {
+                trackUris.push(trackResponse.data.uri);
+            }
+        }
+
+        if (trackUris.length > 0) {
+            await addTracksToPlaylistOnSpotify(playlistId, trackUris);
         }
 
         // Handle success, maybe redirect to the Spotify playlist or show a success message
@@ -47,6 +56,20 @@ const createPlaylistOnSpotify = async () => {
     }
 };
 
+const addTracksToPlaylistOnSpotify = async (playlistId, trackUris) => {
+    try {
+        await axios.post('api/spotify/add-tracks', {
+            playlist_id: playlistId,
+            track_uris: trackUris
+        });
+        console.log('Tracks added to the playlist successfully');
+    } catch (error) {
+        console.error('Error adding tracks to the playlist:', error.response.data);
+        // Handle errors, maybe show an error message to the user
+    }
+};
+
+
 const searchTrackOnSpotify = async (artist, trackTitle) => {
     try {
         const trackResponse = await axios.post('api/spotify/search-track', {
@@ -54,8 +77,8 @@ const searchTrackOnSpotify = async (artist, trackTitle) => {
             trackTitle: trackTitle
         });
 
-        console.log('Search Results:', trackResponse.data);
-        // You can do more with the search results here, like displaying them in your component.
+        console.log('Search Results:', trackResponse.data.uri);
+        return trackResponse; // Return the response so the URI can be used
     } catch (error) {
         console.error('Error in searching track:', error.response.data);
         // Handle errors, maybe show an error message to the user
