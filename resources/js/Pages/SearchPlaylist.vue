@@ -72,7 +72,7 @@ const addToSpotify = async () => {
         </div>
 
         <div class="row">
-            <div class="col-md-3 offset-md-5">
+            <div class="col-md-3 offset-lg-5">
                 <button id="add-to-spotify" class="btn btn-secondary btn-lg mt-5" @click="addToSpotify">Add to Spotify</button>
             </div>
         </div>
