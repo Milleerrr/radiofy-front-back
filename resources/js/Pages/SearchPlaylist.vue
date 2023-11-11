@@ -37,7 +37,6 @@ const updateCheckedState = (song, isChecked) => {
 
 const checkPlaylistNameIsNotEmpty = () => {
     if (!playlistName.value) {
-        alert('Please enter a playlist name.');
         return;
     }
 }
@@ -61,11 +60,10 @@ watchEffect(() => {
 });
 
 const addToSpotify = async () => {
-    checkPlaylistNameIsNotEmpty();
-
     // Filter the songs that are checked
     const tracksToAdd = songs.value.filter(song => song.checked);
     try {
+        checkPlaylistNameIsNotEmpty();
         const response = await axios.post('api/spotify/add-to-spotify', {
             playlistName: playlistName.value,
             tracks: tracksToAdd,
@@ -86,7 +84,7 @@ const addToSpotify = async () => {
         // Use SweetAlert to show an error message
         Swal.fire(
           'Error!',
-          'There was a problem adding to Spotify.',
+          'There was a problem adding to Spotify. Check playlist name is not empty',
           'error',
         );
     }
@@ -136,7 +134,7 @@ const addToSpotify = async () => {
         </div>
 
         <div class="row">
-            <div class="col-md-3 offset-lg-5">
+            <div class="col-lg-3 offset-5 mt-3" id="">
                 <button id="add-to-spotify" class="btn btn-secondary btn-lg mt-5" @click="addToSpotify">Add to
                     Spotify</button>
             </div>
@@ -149,6 +147,8 @@ const addToSpotify = async () => {
 #add-to-spotify {
     background-color: rgb(5, 180, 34);
     border-color: rgb(5, 180, 34);
+    position: relative;
+    right: 1rem;
 }
 
 #add-to-spotify:hover {
