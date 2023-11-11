@@ -4,6 +4,7 @@ import SearchPlaylistCards from '@/Widgets/SearchPlaylistCards.vue';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import axios from 'axios';
 import { Head } from '@inertiajs/vue3';
+import Swal from 'sweetalert2';
 
 // Variables
 // Reactive properties for the playlist and selection states
@@ -69,12 +70,25 @@ const addToSpotify = async () => {
             playlistName: playlistName.value,
             tracks: tracksToAdd,
         });
-        alert('Hooray! Playlist created');
+        
+        // Use SweetAlert to show a success message
+        Swal.fire(
+          'Success!',
+          'The playlist has magically been added to your Spotify account.', // You can use response.data.message if it contains the message
+          'success',
+        );
+
         console.log(response.data.message); // Assuming the backend sends back a success message
         // Handle success here
     } catch (error) {
         console.error('Error adding to Spotify:', error.response.data);
-        // Handle error here
+        
+        // Use SweetAlert to show an error message
+        Swal.fire(
+          'Error!',
+          'There was a problem adding to Spotify.',
+          'error',
+        );
     }
 };
 
