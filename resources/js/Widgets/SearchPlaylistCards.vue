@@ -27,8 +27,8 @@ watchEffect(() => {
                 <img id="song-img" class="rounded" :src="props.imageUrl">
             </div>
             <div class="col-md-5">
-                <p>{{ props.title }}</p>
-                <p>{{ props.artists }}</p>
+                <p id="card-text">{{ props.title }}</p>
+                <p id="card-text">{{ props.artists }}</p>
                 <!-- <p>Album name</p> -->
                 <audio controls>
                     <source type="audio/mp3" :src="props.audioUrl">
@@ -68,6 +68,9 @@ watchEffect(() => {
     height: auto;
 }
 
+#card-text {
+    font-size: 2rem;
+}
 .checkbox-wrapper-12 {
     position: relative;
 }

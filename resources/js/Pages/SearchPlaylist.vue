@@ -14,6 +14,9 @@ let playlistName = ref('');
 let isCheckAll = ref(false);
 
 const fetchPlaylist = async () => {
+
+    checkPlaylistNameIsNotEmpty();
+
     try {
         // Use fetch to get the local .json file
         const response = await fetch(`./data/${selectedStation.value}.json`);
@@ -29,6 +32,7 @@ const fetchPlaylist = async () => {
                     artist: song.artist,
                     trackTitle: song.title,
                 });
+
                 return {
                     ...song,
                     checked: true,
@@ -69,7 +73,11 @@ const updateCheckedState = (song, isChecked) => {
 
 const checkPlaylistNameIsNotEmpty = () => {
     if (!playlistName.value) {
-        return;
+        return Swal.fire(
+            'Error!',
+            'There was a problem adding to Spotify. Check playlist name is not empty',
+            'error',
+        );;
     }
 }
 
@@ -188,4 +196,5 @@ const addToSpotify = async () => {
 
 #add-to-spotify:hover {
     opacity: 70%;
-}</style>
+}
+</style>
