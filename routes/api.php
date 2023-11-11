@@ -31,3 +31,5 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::post('/spotify/add-to-spotify', [SpotifyServiceController::class, 'addToSpotify'])
     ->name('spotify.add-to-spotify');
 
+Route::post('/spotify/retrieve-song-info', [SpotifyServiceController::class, 'retrieveSongInfo'])
+    ->name('spotify.retrieve-song-info');

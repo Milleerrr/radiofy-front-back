@@ -126,4 +126,32 @@ class SpotifyServiceController extends Controller
             return response()->json(['message' => 'An error occurred'], 500);
         }
     }
+
+    public function retrieveSongInfo(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
+
+        $request->validate([
+            'artist' => 'required|string',
+            'trackTitle' => 'required|string',
+        ]);
+
+        $artist = $request->input('artist');
+        $trackTitle = $request->input('trackTitle');
+
+        $accessToken = $this->spotifyService->getSpotifyAccessToken($user);
+
+        $track = $this->spotifyService->searchTrackOnSpotify($accessToken, $artist, $trackTitle);
+
+        if (!$track) {
+            return response()->json(['message' => 'Track not found'], 404);
+        }
+
+        // You may want to log the track or do something with it here.
+        // For now, we'll just return it.
+        return response()->json($track);
+    }
 }

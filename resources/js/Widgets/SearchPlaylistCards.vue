@@ -1,14 +1,21 @@
 <script setup>
 import { ref, defineProps, defineEmits, watchEffect } from 'vue';
 
-const props = defineProps(['title', 'artist', 'checked']);
+const props = defineProps({
+  title: String,
+  artists: String,
+  imageUrl: String,
+  audioUrl: String,
+  checked: Boolean
+});
+
 const emits = defineEmits(['update:checked']);
 
 // Use 'checked' prop with v-model
 const isChecked = ref(props.checked);
 
 watchEffect(() => {
-    isChecked.value = props.checked; // Ensure isChecked is reactive to prop changes
+    isChecked.value = props.checked;
 });
 
 </script>
@@ -17,14 +24,14 @@ watchEffect(() => {
     <div class="container">
         <div class="row align-items-center border shadow mt-5 bg-body-tertiary rounded">
             <div class="col-md-5 ps-0">
-                <img id="song-img" class="rounded" src="/assets/pinkfloyd.png">
+                <img id="song-img" class="rounded" :src="props.imageUrl">
             </div>
             <div class="col-md-5">
-                <p>{{ title }}</p>
-                <p>{{ artist }}</p>
+                <p>{{ props.title }}</p>
+                <p>{{ props.artists }}</p>
                 <!-- <p>Album name</p> -->
-                <audio controls autoplay>
-                    <source type="audio/mp3">
+                <audio controls>
+                    <source type="audio/mp3" :src="props.audioUrl">
                     Your browser does not support the audio element.
                 </audio>
             </div>

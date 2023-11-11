@@ -15,17 +15,49 @@ let isCheckAll = ref(false);
 
 const fetchPlaylist = async () => {
     try {
+        // Use fetch to get the local .json file
         const response = await fetch(`./data/${selectedStation.value}.json`);
         if (!response.ok) {
-            throw new Error('Network response was not ok.');
+            throw new Error('Network response was not ok for fetching playlist data.');
         }
         const data = await response.json();
-        // Add 'checked' property to each song object
-        songs.value = data.Radio1Dance.map(song => ({ ...song, checked: true }));
+
+        // Loop through each track and send individual requests
+        const trackDetails = await Promise.all(data.Radio1Dance.map(async (song) => {
+            try {
+                const spotifyResponse = await axios.post('/api/spotify/retrieve-song-info', {
+                    artist: song.artist,
+                    trackTitle: song.title,
+                });
+                return {
+                    ...song,
+                    checked: true,
+                    imageUrl: spotifyResponse.data.album.images[0].url,
+                    artists: spotifyResponse.data.artists.map(artist => artist.name),
+                    title: spotifyResponse.data.name,
+                    previewUrl: spotifyResponse.data.preview_url,
+                };
+            } catch (error) {
+                console.error('Error retrieving song info:', error.response.data);
+                return song; // Return the original song if the API call fails
+            }
+        }));
+
+        // Update the songs array with the returned objects for each song
+        songs.value = trackDetails;
+
+        console.log(trackDetails);
+
     } catch (error) {
-        console.error('Fetch error:', error.response.data);
+        // Check if the error comes from axios or fetch and handle accordingly
+        if (error.response) { // This is an axios error
+            console.error('Axios error:', error.response.data);
+        } else { // This is a fetch error
+            console.error('Fetch error:', error.message);
+        }
     }
 };
+
 
 const updateCheckedState = (song, isChecked) => {
     // Find the song in the songs array and update its checked property
@@ -68,24 +100,24 @@ const addToSpotify = async () => {
             playlistName: playlistName.value,
             tracks: tracksToAdd,
         });
-        
+
         // Use SweetAlert to show a success message
         Swal.fire(
-          'Success!',
-          'The playlist has magically been added to your Spotify account.', // You can use response.data.message if it contains the message
-          'success',
+            'Success!',
+            'The playlist has magically been added to your Spotify account.', // You can use response.data.message if it contains the message
+            'success',
         );
 
         console.log(response.data.message); // Assuming the backend sends back a success message
         // Handle success here
     } catch (error) {
         console.error('Error adding to Spotify:', error.response.data);
-        
+
         // Use SweetAlert to show an error message
         Swal.fire(
-          'Error!',
-          'There was a problem adding to Spotify. Check playlist name is not empty',
-          'error',
+            'Error!',
+            'There was a problem adding to Spotify. Check playlist name is not empty',
+            'error',
         );
     }
 };
@@ -121,16 +153,19 @@ const addToSpotify = async () => {
 
 
         <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-            <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" :checked="!isCheckAll" @change="checkAll">
+            <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" :checked="!isCheckAll"
+                @change="checkAll">
             <label class="btn btn-outline-primary" for="btnradio1">Deselect all</label>
 
-            <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off" :checked="isCheckAll" @change="checkAll">
+            <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off" :checked="isCheckAll"
+                @change="checkAll">
             <label class="btn btn-outline-primary" for="btnradio2">Select all </label>
         </div>
 
         <div class="container">
-            <SearchPlaylistCards v-for="song in songs" :key="song.id" :title="song.title" :artist="song.artist"
-                :checked="song.checked" @update:checked="updateCheckedState(song, $event)" />
+            <SearchPlaylistCards v-for="song in songs" :key="song.id" :title="song.title" :artists="song.artist"
+                :imageUrl="song.imageUrl" :audioUrl="song.previewUrl" :checked="song.checked"
+                @update:checked="updateCheckedState(song, $event)" />
         </div>
 
         <div class="row">
@@ -153,5 +188,4 @@ const addToSpotify = async () => {
 
 #add-to-spotify:hover {
     opacity: 70%;
-}
-</style>
+}</style>
