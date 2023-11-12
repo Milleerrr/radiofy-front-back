@@ -12,6 +12,7 @@ let selectedStation = ref('');
 let songs = ref([]);
 let playlistName = ref('');
 let isCheckAll = ref(false);
+let loading = ref(false);
 
 const failAlert = () => {
     return Swal.fire(
@@ -29,7 +30,11 @@ const successAlert = () => {
     )
 }
 
+
+
 const retrieveSongInfo = async () => {
+
+    loading.value = true;
 
     checkPlaylistNameIsNotEmpty();
 
@@ -63,6 +68,7 @@ const retrieveSongInfo = async () => {
         // Update the songs array with the returned objects for each song
         songs.value = trackDetails;
 
+        loading.value = false;
     } catch (error) {
         // Check if the error comes from axios or fetch and handle accordingly
         if (error.response) { // This is an axios error
@@ -164,29 +170,38 @@ const addToSpotify = async () => {
             </form>
         </div>
 
-
-        <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-            <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" :checked="!isCheckAll"
-                @change="checkAll">
-            <label class="btn btn-outline-primary" for="btnradio1">Deselect all</label>
-
-            <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off" :checked="isCheckAll"
-                @change="checkAll">
-            <label class="btn btn-outline-primary" for="btnradio2">Select all </label>
+        <div v-if="loading" class="container">
+            <button class="btn btn-primary" type="button" disabled>
+                <span class="spinner-grow spinner-grow-sm" aria-hidden="true"></span>
+                <span role="status">Loading...</span>
+            </button>
         </div>
 
-        <div class="container">
-            <SearchPlaylistCards v-for="song in songs" :key="song.id" :title="song.title" :artists="song.artist"
-                :imageUrl="song.imageUrl" :audioUrl="song.previewUrl" :checked="song.checked"
-                @update:checked="updateCheckedState(song, $event)" />
-        </div>
+        <div v-else>
+            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off"
+                    :checked="!isCheckAll" @change="checkAll">
+                <label class="btn btn-outline-primary" for="btnradio1">Deselect all</label>
 
-        <div class="row">
-            <div class="col-lg-3 offset-5 mt-3" id="">
-                <button id="add-to-spotify" class="btn btn-secondary btn-lg mt-5" @click="addToSpotify">Add to
-                    Spotify</button>
+                <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off"
+                    :checked="isCheckAll" @change="checkAll">
+                <label class="btn btn-outline-primary" for="btnradio2">Select all </label>
+            </div>
+
+            <div class="container">
+                <SearchPlaylistCards v-for="song in songs" :key="song.id" :title="song.title" :artists="song.artist"
+                    :imageUrl="song.imageUrl" :audioUrl="song.previewUrl" :checked="song.checked"
+                    @update:checked="updateCheckedState(song, $event)" />
+            </div>
+
+            <div class="row">
+                <div class="col-lg-3 offset-5 mt-3" id="">
+                    <button id="add-to-spotify" class="btn btn-secondary btn-lg mt-5" @click="addToSpotify">Add to
+                        Spotify</button>
+                </div>
             </div>
         </div>
+
     </MainLayout>
 </template>
 

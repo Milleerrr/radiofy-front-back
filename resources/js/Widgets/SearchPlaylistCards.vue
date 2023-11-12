@@ -29,7 +29,6 @@ watchEffect(() => {
             <div class="col-md-5">
                 <p id="card-title">{{ props.title }}</p>
                 <p id="card-artist"><i>{{ props.artists }}</i></p>
-                <!-- <p>Album name</p> -->
                 <audio controls>
                     <source type="audio/mp3" :src="props.audioUrl">
                     Your browser does not support the audio element.
@@ -68,11 +67,11 @@ watchEffect(() => {
 }
 
 #card-title {
-    font-size: 2rem;
+    font-size: 3rem;
 }
 
-#card-title {
-    font-size: 1.5rem;
+#card-artist {
+    font-size: 2rem;
 }
 
 .checkbox-wrapper-12 {
