@@ -2,11 +2,11 @@
 import { ref, defineProps, defineEmits, watchEffect } from 'vue';
 
 const props = defineProps({
-  title: String,
-  artists: String,
-  imageUrl: String,
-  audioUrl: String,
-  checked: Boolean
+    title: String,
+    artists: String,
+    imageUrl: String,
+    audioUrl: String,
+    checked: Boolean
 });
 
 const emits = defineEmits(['update:checked']);
@@ -27,8 +27,8 @@ watchEffect(() => {
                 <img id="song-img" class="rounded" :src="props.imageUrl">
             </div>
             <div class="col-md-5">
-                <p id="card-text">{{ props.title }}</p>
-                <p id="card-text">{{ props.artists }}</p>
+                <p id="card-title">{{ props.title }}</p>
+                <p id="card-artist"><i>{{ props.artists }}</i></p>
                 <!-- <p>Album name</p> -->
                 <audio controls>
                     <source type="audio/mp3" :src="props.audioUrl">
@@ -38,10 +38,9 @@ watchEffect(() => {
             <div class="col-md-2">
                 <div class="checkbox-wrapper-12">
                     <div class="cbx">
-                        <input id="cbx-12" type="checkbox" v-model="isChecked"
-                            @change="$emit('update:checked')"/>
+                        <input id="cbx-12" type="checkbox" v-model="isChecked" @change="$emit('update:checked')" />
                         <label for="cbx-12"></label>
-                        <svg width="15" height="14" viewbox="0 0 15 14" fill="none">
+                        <svg width="30" height="30" viewBox="0 0 15 14" fill="none">
                             <path d="M2 8.36364L6.23077 12L13 2"></path>
                         </svg>
                     </div>
@@ -68,9 +67,14 @@ watchEffect(() => {
     height: auto;
 }
 
-#card-text {
+#card-title {
     font-size: 2rem;
 }
+
+#card-title {
+    font-size: 1.5rem;
+}
+
 .checkbox-wrapper-12 {
     position: relative;
 }
@@ -101,8 +105,8 @@ watchEffect(() => {
 }
 
 .checkbox-wrapper-12 .cbx {
-    width: 24px;
-    height: 24px;
+    width: 48px;
+    height: 48px;
     top: calc(50vh - 12px);
     left: calc(50vw - 12px);
 }
@@ -111,15 +115,15 @@ watchEffect(() => {
     position: absolute;
     top: 0;
     left: 0;
-    width: 24px;
-    height: 24px;
+    width: 48px;
+    height: 48px;
     border: 2px solid #bfbfc0;
     border-radius: 50%;
 }
 
 .checkbox-wrapper-12 .cbx label {
-    width: 24px;
-    height: 24px;
+    width: 48px;
+    height: 48px;
     background: none;
     border-radius: 50%;
     position: absolute;
@@ -133,8 +137,9 @@ watchEffect(() => {
 
 .checkbox-wrapper-12 .cbx svg {
     position: absolute;
-    top: 5px;
-    left: 4px;
+    top: 47%; /* Center vertically */
+    left: 15%; /* Center horizontally */
+    transform: translate(-50%, -50%); /* Adjust for exact centering */
     z-index: 1;
     pointer-events: none;
 }
@@ -161,49 +166,48 @@ watchEffect(() => {
 @-moz-keyframes splash-12 {
     40% {
         background: rgb(5, 180, 34);
-        box-shadow: 0 -18px 0 -8px rgb(5, 180, 34), 16px -8px 0 -8px rgb(5, 180, 34), 16px 8px 0 -8px rgb(5, 180, 34), 0 18px 0 -8px rgb(5, 180, 34), -16px 8px 0 -8px rgb(5, 180, 34), -16px -8px 0 -8px rgb(5, 180, 34);
+        box-shadow: 0 -36px 0 -16px rgb(5, 180, 34), 32px -16px 0 -16px rgb(5, 180, 34), 32px 16px 0 -16px rgb(5, 180, 34), 0 36px 0 -16px rgb(5, 180, 34), -32px 16px 0 -16px rgb(5, 180, 34), -32px -16px 0 -16px rgb(5, 180, 34);
     }
 
     100% {
         background: rgb(5, 180, 34);
-        box-shadow: 0 -36px 0 -10px transparent, 32px -16px 0 -10px transparent, 32px 16px 0 -10px transparent, 0 36px 0 -10px transparent, -32px 16px 0 -10px transparent, -32px -16px 0 -10px transparent;
+        box-shadow: 0 -72px 0 -20px transparent, 64px -32px 0 -20px transparent, 64px 32px 0 -20px transparent, 0 72px 0 -20px transparent, -64px 32px 0 -20px transparent, -64px -32px 0 -20px transparent;
     }
 }
 
 @-webkit-keyframes splash-12 {
     40% {
         background: rgb(5, 180, 34);
-        box-shadow: 0 -18px 0 -8px rgb(5, 180, 34), 16px -8px 0 -8px rgb(5, 180, 34), 16px 8px 0 -8px rgb(5, 180, 34), 0 18px 0 -8px rgb(5, 180, 34), -16px 8px 0 -8px rgb(5, 180, 34), -16px -8px 0 -8px rgb(5, 180, 34);
+        box-shadow: 0 -36px 0 -16px rgb(5, 180, 34), 32px -16px 0 -16px rgb(5, 180, 34), 32px 16px 0 -16px rgb(5, 180, 34), 0 36px 0 -16px rgb(5, 180, 34), -32px 16px 0 -16px rgb(5, 180, 34), -32px -16px 0 -16px rgb(5, 180, 34);
     }
 
     100% {
         background: rgb(5, 180, 34);
-        box-shadow: 0 -36px 0 -10px transparent, 32px -16px 0 -10px transparent, 32px 16px 0 -10px transparent, 0 36px 0 -10px transparent, -32px 16px 0 -10px transparent, -32px -16px 0 -10px transparent;
+        box-shadow: 0 -72px 0 -20px transparent, 64px -32px 0 -20px transparent, 64px 32px 0 -20px transparent, 0 72px 0 -20px transparent, -64px 32px 0 -20px transparent, -64px -32px 0 -20px transparent;
     }
 }
 
 @-o-keyframes splash-12 {
     40% {
         background: rgb(5, 180, 34);
-        box-shadow: 0 -18px 0 -8px rgb(5, 180, 34), 16px -8px 0 -8px rgb(5, 180, 34), 16px 8px 0 -8px rgb(5, 180, 34), 0 18px 0 -8px rgb(5, 180, 34), -16px 8px 0 -8px rgb(5, 180, 34), -16px -8px 0 -8px rgb(5, 180, 34);
+        box-shadow: 0 -36px 0 -16px rgb(5, 180, 34), 32px -16px 0 -16px rgb(5, 180, 34), 32px 16px 0 -16px rgb(5, 180, 34), 0 36px 0 -16px rgb(5, 180, 34), -32px 16px 0 -16px rgb(5, 180, 34), -32px -16px 0 -16px rgb(5, 180, 34);
     }
 
     100% {
         background: rgb(5, 180, 34);
-        box-shadow: 0 -36px 0 -10px transparent, 32px -16px 0 -10px transparent, 32px 16px 0 -10px transparent, 0 36px 0 -10px transparent, -32px 16px 0 -10px transparent, -32px -16px 0 -10px transparent;
+        box-shadow: 0 -72px 0 -20px transparent, 64px -32px 0 -20px transparent, 64px 32px 0 -20px transparent, 0 72px 0 -20px transparent, -64px 32px 0 -20px transparent, -64px -32px 0 -20px transparent;
     }
 }
 
 @keyframes splash-12 {
     40% {
         background: rgb(5, 180, 34);
-        box-shadow: 0 -18px 0 -8px rgb(5, 180, 34), 16px -8px 0 -8px rgb(5, 180, 34), 16px 8px 0 -8px rgb(5, 180, 34), 0 18px 0 -8px rgb(5, 180, 34), -16px 8px 0 -8px rgb(5, 180, 34), -16px -8px 0 -8px rgb(5, 180, 34);
+        box-shadow: 0 -36px 0 -16px rgb(5, 180, 34), 32px -16px 0 -16px rgb(5, 180, 34), 32px 16px 0 -16px rgb(5, 180, 34), 0 36px 0 -16px rgb(5, 180, 34), -32px 16px 0 -16px rgb(5, 180, 34), -32px -16px 0 -16px rgb(5, 180, 34);
     }
 
     100% {
         background: rgb(5, 180, 34);
-        box-shadow: 0 -36px 0 -10px transparent, 32px -16px 0 -10px transparent, 32px 16px 0 -10px transparent, 0 36px 0 -10px transparent, -32px 16px 0 -10px transparent, -32px -16px 0 -10px transparent;
+        box-shadow: 0 -72px 0 -20px transparent, 64px -32px 0 -20px transparent, 64px 32px 0 -20px transparent, 0 72px 0 -20px transparent, -64px 32px 0 -20px transparent, -64px -32px 0 -20px transparent;
     }
-}
-</style>
+}</style>
   

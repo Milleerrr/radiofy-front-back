@@ -14,11 +14,19 @@ let playlistName = ref('');
 let isCheckAll = ref(false);
 
 const failAlert = () => {
-    return Swal.fire (
-            'Error!',
-            'There was a problem adding to Spotify. Check playlist name is not empty',
-            'error',
-        );
+    return Swal.fire(
+        'Error!',
+        'There was a problem adding to Spotify. Check playlist name is not empty',
+        'error',
+    );
+}
+
+const successAlert = () => {
+    return Swal.fire(
+        'Success!',
+        'The playlist has magically been added to your Spotify account.', // You can use response.data.message if it contains the message
+        'success',
+    )
 }
 
 const retrieveSongInfo = async () => {
@@ -117,14 +125,8 @@ const addToSpotify = async () => {
         });
 
         // Use SweetAlert to show a success message
-        Swal.fire(
-            'Success!',
-            'The playlist has magically been added to your Spotify account.', // You can use response.data.message if it contains the message
-            'success',
-        );
+        successAlert();
 
-        console.log(response.data.message); // Assuming the backend sends back a success message
-        // Handle success here
     } catch (error) {
         console.error('Error adding to Spotify:', error.response.data);
 

@@ -14,6 +14,10 @@ export default defineConfig({
                     base: null,
                     includeAbsolute: false,
                 },
+                compilerOptions: {
+                    // Add this to handle SVG elements
+                    isCustomElement: tag => /^fe/.test(tag)
+                }
             },
         }),
     ],
