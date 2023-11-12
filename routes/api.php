@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\GifController;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -33,3 +34,6 @@ Route::post('/spotify/add-to-spotify', [SpotifyServiceController::class, 'addToS
 
 Route::post('/spotify/retrieve-song-info', [SpotifyServiceController::class, 'retrieveSongInfo'])
     ->name('spotify.retrieve-song-info');
+
+Route::get('/random-gif', [GifController::class,'getRandomGif'])
+    ->name('radom.gif');

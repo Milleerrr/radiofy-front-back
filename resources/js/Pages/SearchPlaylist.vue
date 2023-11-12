@@ -14,6 +14,9 @@ let playlistName = ref('');
 let isCheckAll = ref(false);
 let isLoading = ref(false);
 let isSaving = ref(false)
+let giphyImage = ref('');
+
+const giphyApiKey = import.meta.env.GIPHY_API_KEY;
 
 const failAlert = () => {
     return Swal.fire(
@@ -46,6 +49,7 @@ const retrieveSongInfo = async () => {
         // Fetch playlist from JSON file
         let data = await fetchPlaylist();
 
+        getRandomGif();
         isLoading.value = true;
         // Loop through each track and send individual requests
         const trackDetails = await Promise.all(data.Radio1Dance.map(async (song) => {
@@ -90,6 +94,15 @@ const fetchPlaylist = async () => {
     }
     return response.json();
 }
+
+async function getRandomGif() {
+  try {
+    const response = await axios.get('/api/random-gif'); // Adjust the URL based on your actual API endpoint
+    giphyImage.value = response.data.data.images.original.url;
+  } catch (error) {
+    console.error('Error fetching a random GIF:', error.response.data);
+  }
+};
 
 
 const updateCheckedState = (song, isChecked) => {
@@ -184,6 +197,10 @@ const addToSpotify = async () => {
                 <span class="spinner-grow spinner-grow-sm" aria-hidden="true"></span>
                 <span role="status">Loading...</span>
             </button>
+
+            <div class="container mt-5 giphy-image">
+                <img :src="giphyImage"/>
+            </div>
         </div>
 
         <div v-else>
@@ -257,6 +274,11 @@ const addToSpotify = async () => {
     position: relative;
     left: 43.25%;
     margin-top: 2rem;
+}
+
+.giphy-image {
+    display: flex;
+    justify-content: center;
 }
 
 </style>
