@@ -96,12 +96,12 @@ const fetchPlaylist = async () => {
 }
 
 async function getRandomGif() {
-  try {
-    const response = await axios.get('/api/random-gif'); // Adjust the URL based on your actual API endpoint
-    giphyImage.value = response.data.data.images.original.url;
-  } catch (error) {
-    console.error('Error fetching a random GIF:', error.response.data);
-  }
+    try {
+        const response = await axios.get('/api/random-gif'); // Adjust the URL based on your actual API endpoint
+        giphyImage.value = response.data.data.images.original.url;
+    } catch (error) {
+        console.error('Error fetching a random GIF:', error.response.data);
+    }
 };
 
 
@@ -142,9 +142,11 @@ const addToSpotify = async () => {
     if (songs.value.length === 0) return failAlert();
     // Filter the songs that are checked
     const tracksToAdd = songs.value.filter(song => song.checked);
-    try { 
+    try {
 
         checkPlaylistNameIsNotEmpty();
+        getRandomGif();
+        
         isSaving.value = true;
         const response = await axios.post('api/spotify/add-to-spotify', {
             playlistName: playlistName.value,
@@ -199,7 +201,7 @@ const addToSpotify = async () => {
             </button>
 
             <div class="container mt-5 giphy-image">
-                <img :src="giphyImage"/>
+                <img :src="giphyImage" />
             </div>
         </div>
 
@@ -236,6 +238,10 @@ const addToSpotify = async () => {
                     <span class="spinner-grow spinner-grow-sm" aria-hidden="true"></span>
                     <span role="status">Saving...</span>
                 </button>
+
+                <div class="container mt-5 giphy-image">
+                    <img :src="giphyImage" />
+                </div>˝
             </div>
         </div>
 
@@ -280,5 +286,4 @@ const addToSpotify = async () => {
     display: flex;
     justify-content: center;
 }
-
 </style>
