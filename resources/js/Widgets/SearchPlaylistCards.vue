@@ -62,7 +62,7 @@ watchEffect(() => {
 
 <style scoped>
 #song-img {
-    width: 70%;
+    width: 60%;
     height: auto;
 }
 

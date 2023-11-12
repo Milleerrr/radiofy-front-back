@@ -28,9 +28,14 @@ const successAlert = () => {
         'The playlist has magically been added to your Spotify account.', // You can use response.data.message if it contains the message
         'success',
     )
-}
+};
 
-
+const scrollToBottom = () => {
+    window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: 'smooth',
+    });
+};
 
 const retrieveSongInfo = async () => {
 
@@ -171,13 +176,17 @@ const addToSpotify = async () => {
         </div>
 
         <div v-if="loading" class="container">
-            <button class="btn btn-primary" type="button" disabled>
+            <button class="btn btn-primary btn-lg" type="button" disabled>
                 <span class="spinner-grow spinner-grow-sm" aria-hidden="true"></span>
                 <span role="status">Loading...</span>
             </button>
         </div>
 
         <div v-else>
+            <button id="scroll-to-bottom-btn" class="btn btn-primary btn-lg" @click="scrollToBottom">
+                ↓
+            </button>
+
             <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
                 <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off"
                     :checked="!isCheckAll" @change="checkAll">
@@ -207,6 +216,15 @@ const addToSpotify = async () => {
 
 
 <style scoped>
+#scroll-to-bottom-btn {
+    position: fixed;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    z-index: 1000;
+    cursor: pointer;
+}
+
 #add-to-spotify {
     background-color: rgb(5, 180, 34);
     border-color: rgb(5, 180, 34);
@@ -216,5 +234,4 @@ const addToSpotify = async () => {
 
 #add-to-spotify:hover {
     opacity: 70%;
-}
-</style>
+}</style>
