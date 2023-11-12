@@ -29,10 +29,15 @@ watchEffect(() => {
             <div class="col-md-5">
                 <p id="card-title">{{ props.title }}</p>
                 <p id="card-artist"><i>{{ props.artists }}</i></p>
-                <audio controls>
-                    <source type="audio/mp3" :src="props.audioUrl">
-                    Your browser does not support the audio element.
-                </audio>
+                <div v-if="props.audioUrl">
+                    <audio controls>
+                        <source type="audio/mp3" :src="props.audioUrl">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                <div v-else>
+                    <span>No audio preview available for this song</span>
+                </div>
             </div>
             <div class="col-md-2">
                 <div class="checkbox-wrapper-12">
@@ -67,11 +72,11 @@ watchEffect(() => {
 }
 
 #card-title {
-    font-size: 3rem;
+    font-size: 2.25rem;
 }
 
 #card-artist {
-    font-size: 2rem;
+    font-size: 1.5rem;
 }
 
 .checkbox-wrapper-12 {
@@ -136,9 +141,12 @@ watchEffect(() => {
 
 .checkbox-wrapper-12 .cbx svg {
     position: absolute;
-    top: 47%; /* Center vertically */
-    left: 15%; /* Center horizontally */
-    transform: translate(-50%, -50%); /* Adjust for exact centering */
+    top: 50%;
+    /* Center vertically */
+    left: 15%;
+    /* Center horizontally */
+    transform: translate(-50%, -50%);
+    /* Adjust for exact centering */
     z-index: 1;
     pointer-events: none;
 }

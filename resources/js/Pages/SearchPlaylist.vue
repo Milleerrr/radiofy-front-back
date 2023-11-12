@@ -12,12 +12,13 @@ let selectedStation = ref('');
 let songs = ref([]);
 let playlistName = ref('');
 let isCheckAll = ref(false);
-let loading = ref(false);
+let isLoading = ref(false);
+let isSaving = ref(false)
 
 const failAlert = () => {
     return Swal.fire(
         'Error!',
-        'There was a problem adding to Spotify. Check playlist name is not empty',
+        'There was a problem adding to Spotify. Playlist name or Songs list must not be empty.',
         'error',
     );
 }
@@ -39,15 +40,13 @@ const scrollToBottom = () => {
 
 const retrieveSongInfo = async () => {
 
-    loading.value = true;
-
     checkPlaylistNameIsNotEmpty();
 
     try {
         // Fetch playlist from JSON file
-
         let data = await fetchPlaylist();
 
+        isLoading.value = true;
         // Loop through each track and send individual requests
         const trackDetails = await Promise.all(data.Radio1Dance.map(async (song) => {
             try {
@@ -73,7 +72,7 @@ const retrieveSongInfo = async () => {
         // Update the songs array with the returned objects for each song
         songs.value = trackDetails;
 
-        loading.value = false;
+        isLoading.value = false;
     } catch (error) {
         // Check if the error comes from axios or fetch and handle accordingly
         if (error.response) { // This is an axios error
@@ -126,15 +125,20 @@ watchEffect(() => {
 });
 
 const addToSpotify = async () => {
+
+    if (songs.value.length === 0) return failAlert();
     // Filter the songs that are checked
     const tracksToAdd = songs.value.filter(song => song.checked);
-    try {
+    try { 
+
         checkPlaylistNameIsNotEmpty();
+        isSaving.value = true;
         const response = await axios.post('api/spotify/add-to-spotify', {
             playlistName: playlistName.value,
             tracks: tracksToAdd,
         });
 
+        isSaving.value = false;
         // Use SweetAlert to show a success message
         successAlert();
 
@@ -175,8 +179,8 @@ const addToSpotify = async () => {
             </form>
         </div>
 
-        <div v-if="loading" class="container">
-            <button class="btn btn-primary btn-lg" type="button" disabled>
+        <div v-if="isLoading" class="container">
+            <button class="btn btn-primary btn-lg status-loading" type="button" disabled>
                 <span class="spinner-grow spinner-grow-sm" aria-hidden="true"></span>
                 <span role="status">Loading...</span>
             </button>
@@ -204,10 +208,17 @@ const addToSpotify = async () => {
             </div>
 
             <div class="row">
-                <div class="col-lg-3 offset-5 mt-3" id="">
+                <div class="col-lg-3 offset-5 mt-3">
                     <button id="add-to-spotify" class="btn btn-secondary btn-lg mt-5" @click="addToSpotify">Add to
                         Spotify</button>
                 </div>
+            </div>
+
+            <div v-if="isSaving">
+                <button class="btn btn-primary btn-lg status-saving" type="button" disabled>
+                    <span class="spinner-grow spinner-grow-sm" aria-hidden="true"></span>
+                    <span role="status">Saving...</span>
+                </button>
             </div>
         </div>
 
@@ -229,9 +240,23 @@ const addToSpotify = async () => {
     background-color: rgb(5, 180, 34);
     border-color: rgb(5, 180, 34);
     position: relative;
-    right: 1rem;
+    right: 0.7rem;
 }
 
 #add-to-spotify:hover {
     opacity: 70%;
-}</style>
+}
+
+.status-loading {
+    position: relative;
+    left: 42.25%;
+    margin-top: 2rem;
+}
+
+.status-saving {
+    position: relative;
+    left: 43.25%;
+    margin-top: 2rem;
+}
+
+</style>
