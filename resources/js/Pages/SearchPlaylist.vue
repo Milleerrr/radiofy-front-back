@@ -13,17 +13,22 @@ let songs = ref([]);
 let playlistName = ref('');
 let isCheckAll = ref(false);
 
-const fetchPlaylist = async () => {
+const failAlert = () => {
+    return Swal.fire (
+            'Error!',
+            'There was a problem adding to Spotify. Check playlist name is not empty',
+            'error',
+        );
+}
+
+const retrieveSongInfo = async () => {
 
     checkPlaylistNameIsNotEmpty();
 
     try {
-        // Use fetch to get the local .json file
-        const response = await fetch(`./data/${selectedStation.value}.json`);
-        if (!response.ok) {
-            throw new Error('Network response was not ok for fetching playlist data.');
-        }
-        const data = await response.json();
+        // Fetch playlist from JSON file
+
+        let data = await fetchPlaylist();
 
         // Loop through each track and send individual requests
         const trackDetails = await Promise.all(data.Radio1Dance.map(async (song) => {
@@ -50,8 +55,6 @@ const fetchPlaylist = async () => {
         // Update the songs array with the returned objects for each song
         songs.value = trackDetails;
 
-        console.log(trackDetails);
-
     } catch (error) {
         // Check if the error comes from axios or fetch and handle accordingly
         if (error.response) { // This is an axios error
@@ -61,6 +64,14 @@ const fetchPlaylist = async () => {
         }
     }
 };
+
+const fetchPlaylist = async () => {
+    const response = await fetch(`./data/${selectedStation.value}.json`);
+    if (!response.ok) {
+        throw new Error('Network response was not ok for fetching playlist data.');
+    }
+    return response.json();
+}
 
 
 const updateCheckedState = (song, isChecked) => {
@@ -73,11 +84,7 @@ const updateCheckedState = (song, isChecked) => {
 
 const checkPlaylistNameIsNotEmpty = () => {
     if (!playlistName.value) {
-        return Swal.fire(
-            'Error!',
-            'There was a problem adding to Spotify. Check playlist name is not empty',
-            'error',
-        );;
+        return failAlert();
     }
 }
 
@@ -122,11 +129,7 @@ const addToSpotify = async () => {
         console.error('Error adding to Spotify:', error.response.data);
 
         // Use SweetAlert to show an error message
-        Swal.fire(
-            'Error!',
-            'There was a problem adding to Spotify. Check playlist name is not empty',
-            'error',
-        );
+        failAlert();
     }
 };
 
@@ -138,7 +141,7 @@ const addToSpotify = async () => {
 
     <MainLayout>
         <div class="container">
-            <form @submit.prevent="fetchPlaylist">
+            <form @submit.prevent="retrieveSongInfo">
                 <select v-model="selectedStation" class="form-select form-select-lg mb-3 text-center"
                     aria-label="Large select example">
                     <option disabled selected>Select a Radio Station</option>
