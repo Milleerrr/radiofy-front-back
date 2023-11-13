@@ -6,7 +6,6 @@ import { Head, Link } from '@inertiajs/vue3';
 </script>
 
 <template>
-
     <Head title="Radiofy Home" />
 
     <MainLayout>
@@ -14,10 +13,11 @@ import { Head, Link } from '@inertiajs/vue3';
             <div class="row mb-5">
                 <div class="col" id="text">
                     <h1 id="banner">Radiofy your music</h1>
-                    <Link as="button" class="btn btn-secondary btn-lg mt-5" type="button" :href="route('search')">Search playslist</Link>
+                    <Link as="button" class="btn btn-secondary btn-lg mt-5" type="button" :href="route('search')">Search
+                    playslist</Link>
                 </div>
                 <div class="col">
-                    <img id="banner-img" src="/assets/Soundwave.png">
+                    <img class="rounded img-fluid" src="/assets/Soundwave.png">
                 </div>
             </div>
         </div>
@@ -46,9 +46,8 @@ import { Head, Link } from '@inertiajs/vue3';
                 <div class="col">
                     <h2 class="mb-3" id="banner-three">Redefining your listening experience</h2>
                     <p class="fs-6"> "I never miss a song using Radiofy! I used to always forget what song was played on the
-                        radio, spending a
-                        liftime endlessly searching for it. Now Radiofy remembers for me, just search the playlist I was
-                        listening too and in one click it is saved forever to my Spotify account."</p>
+                        radio, spending a liftime endlessly searching for it. Now Radiofy remembers for me, just search the
+                        playlist I was listening too and in one click it is saved forever to my Spotify account."</p>
                     <button id="learn-more" class="btn btn-secondary btn-lg mt-5 mb-5" type="button">Learn more</button>
                 </div>
             </div>
@@ -66,17 +65,11 @@ import { Head, Link } from '@inertiajs/vue3';
     font-weight: 300;
     line-height: 9rem;
     word-spacing: 21rem;
-
 }
 
 #what-we-do {
     font-size: 5rem;
     font-weight: 300;
-}
-
-#banner-img {
-    width: 100%;
-    height: auto;
 }
 
 #person {

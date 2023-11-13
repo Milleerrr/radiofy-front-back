@@ -3,6 +3,7 @@
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\UserDashboardController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -37,6 +38,10 @@ Route::get('/search', [SearchController::class, 'index'])
 Route::get('/login', [LoginController::class, 'index'])
     ->middleware('guest')
     ->name('login');
+
+Route::get('/dashboard', [UserDashboardController::class, 'index'])
+    ->middleware('auth')
+    ->name('dashboard');
 
 // Spotify redirect login
 Route::get('/login/spotify', [LoginController::class, 'redirectToSpotify'])

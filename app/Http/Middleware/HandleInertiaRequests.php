@@ -22,7 +22,7 @@ class HandleInertiaRequests extends Middleware
      */
     private $tailwindRoutes = [
         // 'welcome',
-        'dashboard',
+        // 'dashboard',
         'profile.edit',
         'profile.update',
         'profile.destroy',

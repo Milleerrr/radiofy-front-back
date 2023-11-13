@@ -16,8 +16,6 @@ let isLoading = ref(false);
 let isSaving = ref(false)
 let giphyImage = ref('');
 
-const giphyApiKey = import.meta.env.GIPHY_API_KEY;
-
 const failAlert = () => {
     return Swal.fire(
         'Error!',
