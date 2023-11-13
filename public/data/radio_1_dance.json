@@ -49,6 +49,66 @@
             "id": 10,
             "artist": "Nadia Ali",
             "title": "Rapture"
+        },
+        {
+            "id": 11,
+            "artist": "Azzido da Bass",
+            "title": "Dooms Night"
+        },
+        {
+            "id": 12,
+            "artist": "Sash!",
+            "title": "Encore Une Fois"
+        },
+        {
+            "id": 13,
+            "artist": "Alice DeeJay",
+            "title": "Better Off Alone"
+        },
+        {
+            "id": 14,
+            "artist": "Jungle 70, Majestic",
+            "title": "Creeping In The Dark (Armand van Helden Remix)"
+        },
+        {
+            "id": 15,
+            "artist": "venbee",
+            "title": "Rampage (feat. DJ Ss)"
+        },
+        {
+            "id": 16,
+            "artist": "FISHER, Kita Alexander",
+            "title": "Atmosphere"
+        },
+        {
+            "id": 17,
+            "artist": "Arielle Free",
+            "title": "Feels So Good"
+        },
+        {
+            "id": 18,
+            "artist": "Mark Knight, Funkagenda",
+            "title": "Man With The Red Face"
+        },
+        {
+            "id": 19,
+            "artist": "Skepta",
+            "title": "Can't Play Myself (A Tribute To Amy)"
+        },
+        {
+            "id": 20,
+            "artist": "A Little Sound",
+            "title": "Back To Back (B2B)"
+        },
+        {
+            "id": 21,
+            "artist": "High Contrast",
+            "title": "Remind Me"
+        },
+        {
+            "id": 22,
+            "artist": "Anish Kumar",
+            "title": "Hummingbird"
         }
     ]
 }
