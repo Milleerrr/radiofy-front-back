@@ -35,6 +35,7 @@ import { Head, Link } from '@inertiajs/vue3';
                     <button class="btn btn-secondary btn-lg mt-5 mb-5" type="button">Learn more</button>
                 </div>
             </div>
+            <hr>
         </div>
 
         <div class="container bg-info-subtle my-5 py-2">

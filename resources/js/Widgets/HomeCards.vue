@@ -7,7 +7,7 @@
         <div class="col">
             <div class="card h-100">
                 <div class="card-body">
-                    <h5 class="card-title">Simple</h5>
+                    <h4 class="card-title">Simple</h4>
                     <img src="../../../public/assets/simple.jpg" class="card-img-top img-fluid" alt="#">
                     <p class="card-text">Radiofy offers a one-click solution for adding Radio 1 playlists to Spotify, making
                         music curation effortless and instant for users.</p>
@@ -17,7 +17,7 @@
         <div class="col">
             <div class="card h-100">
                 <div class="card-body">
-                    <h5 class="card-title">Easy</h5>
+                    <h4 class="card-title">Easy</h4>
                     <img src="../../../public/assets/easy.jpg" class="card-img-top img-fluid" alt="#">
                     <p class="card-text">Login with Spotify and in one click, your Spotify account swells with Radio 1's
                         latest tracks.</p>
@@ -27,7 +27,7 @@
         <div class="col">
             <div class="card h-100">
                 <div class="card-body">
-                    <h5 class="card-title">Done</h5>
+                    <h4 class="card-title">Done</h4>
                     <img src="../../../public/assets/headphones.jpg" class="card-img-top img-fluid" alt="#">
                     <p class="card-text">Sit back, relax and enjoy listening to Radio 1 tunes for ever and ever!</p>
                 </div>
