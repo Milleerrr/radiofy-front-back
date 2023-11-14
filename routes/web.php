@@ -4,6 +4,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\UserDashboardController;
+use App\Http\Controllers\BBCSoundsController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -52,4 +53,6 @@ Route::get('/login/google', [LoginController::class, 'redirectToGoogle'])
     ->name('google');
 
 Route::get('/login/spotify/callback', [LoginController::class, 'redirectToSpotifyCallback']);
+
+Route::get('/get-schedule', [BBCSoundsController::class, 'getSchedule']);
 
