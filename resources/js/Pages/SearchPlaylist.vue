@@ -260,7 +260,7 @@ const addToSpotify = async () => {
     background-color: rgb(5, 180, 34);
     border-color: rgb(5, 180, 34);
     position: relative;
-    right: 0.7rem;
+    right: 0.9rem;
 }
 
 #add-to-spotify:hover {

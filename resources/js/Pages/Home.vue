@@ -12,7 +12,7 @@ import { Head, Link } from '@inertiajs/vue3';
         <div class="container">
             <div class="row mb-5">
                 <div class="col" id="text">
-                    <h1 id="banner">Radiofy your music</h1>
+                    <h1  class="=lh-lg display-1">Radiofy your music</h1>
                     <Link as="button" class="btn btn-secondary btn-lg mt-5" type="button" :href="route('search')">Search
                     playslist</Link>
                 </div>
