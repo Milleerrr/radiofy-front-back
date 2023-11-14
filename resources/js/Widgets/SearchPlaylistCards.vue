@@ -21,45 +21,44 @@ watchEffect(() => {
 </script>
 
 <template>
-    <div class="container">
-        <div class="row align-items-center border shadow mt-5 bg-body-tertiary rounded">
-            <div class="col-md-5 ps-0">
-                <img id="song-img" class="rounded" :src="props.imageUrl">
+
+    <div class="row align-items-center border shadow mt-5 bg-body-tertiary rounded mx-0">
+        <div class="col-md-5 ps-0">
+            <img id="song-img" class="rounded" :src="props.imageUrl">
+        </div>
+        <div class="col-md-5">
+            <p id="card-title">{{ props.title }}</p>
+            <p id="card-artist"><i>{{ props.artists }}</i></p>
+            <div v-if="props.audioUrl">
+                <audio controls>
+                    <source type="audio/mp3" :src="props.audioUrl">
+                    Your browser does not support the audio element.
+                </audio>
             </div>
-            <div class="col-md-5">
-                <p id="card-title">{{ props.title }}</p>
-                <p id="card-artist"><i>{{ props.artists }}</i></p>
-                <div v-if="props.audioUrl">
-                    <audio controls>
-                        <source type="audio/mp3" :src="props.audioUrl">
-                        Your browser does not support the audio element.
-                    </audio>
-                </div>
-                <div v-else>
-                    <span>No audio preview available for this song</span>
-                </div>
+            <div v-else>
+                <span>No audio preview available for this song</span>
             </div>
-            <div class="col-md-2">
-                <div class="checkbox-wrapper-12">
-                    <div class="cbx">
-                        <input id="cbx-12" type="checkbox" v-model="isChecked" @change="$emit('update:checked')" />
-                        <label for="cbx-12"></label>
-                        <svg width="30" height="30" viewBox="0 0 15 14" fill="none">
-                            <path d="M2 8.36364L6.23077 12L13 2"></path>
-                        </svg>
-                    </div>
-                    <!-- Gooey-->
-                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
-                        <defs>
-                            <filter id="goo-12">
-                                <fegaussianblur in="SourceGraphic" stddeviation="4" result="blur"></fegaussianblur>
-                                <fecolormatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -7"
-                                    result="goo-12"></fecolormatrix>
-                                <feblend in="SourceGraphic" in2="goo-12"></feblend>
-                            </filter>
-                        </defs>
+        </div>
+        <div class="col-md-2">
+            <div class="checkbox-wrapper-12">
+                <div class="cbx">
+                    <input id="cbx-12" type="checkbox" v-model="isChecked" @change="$emit('update:checked')" />
+                    <label for="cbx-12"></label>
+                    <svg width="30" height="30" viewBox="0 0 15 14" fill="none">
+                        <path d="M2 8.36364L6.23077 12L13 2"></path>
                     </svg>
                 </div>
+                <!-- Gooey-->
+                <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+                    <defs>
+                        <filter id="goo-12">
+                            <fegaussianblur in="SourceGraphic" stddeviation="4" result="blur"></fegaussianblur>
+                            <fecolormatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -7"
+                                result="goo-12"></fecolormatrix>
+                            <feblend in="SourceGraphic" in2="goo-12"></feblend>
+                        </filter>
+                    </defs>
+                </svg>
             </div>
         </div>
     </div>

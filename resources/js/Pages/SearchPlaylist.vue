@@ -170,35 +170,35 @@ const addToSpotify = async () => {
     <Head title="Search" />
 
     <MainLayout>
-        <div class="container">
-            <form @submit.prevent="retrieveSongInfo">
-                <select v-model="selectedStation" class="form-select form-select-lg mb-3 text-center"
-                    aria-label="Large select example">
-                    <option disabled selected>Select a Radio Station</option>
-                    <option value="radio_1">Radio 1</option>
-                    <option value="radio_1_dance">Radio 1 Dance</option>
-                    <option value="radio_1_relax">Radio 1 Relax</option>
-                    <option value="radio_1_xtra">Radio 1Xtra</option>
-                    <option value="radio_2">Radio 2</option>
-                    <option value="radio_3">Radio 3</option>
-                </select>
-                <div class="container input-group input-group-lg">
-                    <input v-model="playlistName" type="text" class="form-control" placeholder="Name your playlist"
-                        aria-describedby="inputGroup-sizing-lg">
-                </div>
-                <div class="col-lg-3 offset-5 mt-3">
-                    <button class="btn btn-outline-success px-5">Search</button>
-                </div>
-            </form>
-        </div>
+        
+        <form @submit.prevent="retrieveSongInfo">
+            <select v-model="selectedStation" class="form-select form-select-lg mb-3 text-center"
+                aria-label="Large select example">
+                <option disabled selected>Select a Radio Station</option>
+                <option value="radio_1">Radio 1</option>
+                <option value="radio_1_dance">Radio 1 Dance</option>
+                <option value="radio_1_relax">Radio 1 Relax</option>
+                <option value="radio_1_xtra">Radio 1Xtra</option>
+                <option value="radio_2">Radio 2</option>
+                <option value="radio_3">Radio 3</option>
+            </select>
+            <div class="input-group input-group-lg">
+                <input v-model="playlistName" type="text" class="form-control" placeholder="Name your playlist"
+                    aria-describedby="inputGroup-sizing-lg">
+            </div>
+            <div class="col-lg-3 offset-5 mt-3">
+                <button class="btn btn-outline-success px-5">Search</button>
+            </div>
+        </form>
+        
 
-        <div v-if="isLoading" class="container">
+        <div v-if="isLoading">
             <button class="btn btn-primary btn-lg status-loading" type="button" disabled>
                 <span class="spinner-grow spinner-grow-sm" aria-hidden="true"></span>
                 <span role="status">Loading...</span>
             </button>
 
-            <div class="container mt-5 giphy-image">
+            <div class="mt-5 giphy-image">
                 <img :src="giphyImage" />
             </div>
         </div>
@@ -218,11 +218,10 @@ const addToSpotify = async () => {
                 <label class="btn btn-outline-primary" for="btnradio2">Select all </label>
             </div>
 
-            <div class="container">
-                <SearchPlaylistCards v-for="song in songs" :key="song.id" :title="song.title" :artists="song.artist"
-                    :imageUrl="song.imageUrl" :audioUrl="song.previewUrl" :checked="song.checked"
-                    @update:checked="updateCheckedState(song, $event)" />
-            </div>
+            
+            <SearchPlaylistCards v-for="song in songs" :key="song.id" :title="song.title" :artists="song.artist"
+                :imageUrl="song.imageUrl" :audioUrl="song.previewUrl" :checked="song.checked"
+                @update:checked="updateCheckedState(song, $event)" />
 
             <div class="row">
                 <div class="col-lg-3 offset-5 mt-3">
@@ -237,7 +236,7 @@ const addToSpotify = async () => {
                     <span role="status">Saving...</span>
                 </button>
 
-                <div class="container mt-5 giphy-image">
+                <div class="mt-5 giphy-image">
                     <img :src="giphyImage" />
                 </div>˝
             </div>
