@@ -1,7 +1,8 @@
 <script setup>
 import { ref, watchEffect } from 'vue';
-import SearchPlaylistCards from '@/Widgets/SearchPlaylistCards.vue';
 import MainLayout from '@/Layouts/MainLayout.vue';
+import SearchPlaylistCards from '@/Widgets/SearchPlaylistCards.vue';
+import BBCProgrammeCards from '@/Widgets/BBCProgrammeCards.vue';
 import axios from 'axios';
 import { Head } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
@@ -16,6 +17,9 @@ let isCheckAll = ref(false);
 let isLoading = ref(false);
 let isSaving = ref(false)
 let giphyImage = ref('');
+let programmeList = ref([]);
+let selectedProgramme = ref();
+let scrapedSongs = ref([]);
 
 const failAlert = () => {
     return Swal.fire(
@@ -46,12 +50,11 @@ const retrieveSongInfo = async () => {
 
     try {
         // Fetch playlist from JSON file
-        let data = await fetchPlaylist();
 
         getRandomGif();
         isLoading.value = true;
         // Loop through each track and send individual requests
-        const trackDetails = await Promise.all(data.Radio1Dance.map(async (song) => {
+        const trackDetails = await Promise.all(scrapedSongs.value.map(async (song) => {
             try {
                 const spotifyResponse = await axios.post('/api/spotify/retrieve-song-info', {
                     artist: song.artist,
@@ -81,18 +84,10 @@ const retrieveSongInfo = async () => {
         if (error.response) { // This is an axios error
             console.error('Axios error:', error.response.data);
         } else { // This is a fetch error
-            console.error('Fetch error:', error.message);
+            console.error('Fetch error:', error.response.data);
         }
     }
 };
-
-const fetchPlaylist = async () => {
-    const response = await fetch(`./data/${selectedStation.value}.json`);
-    if (!response.ok) {
-        throw new Error('Network response was not ok for fetching playlist data.');
-    }
-    return response.json();
-}
 
 async function getRandomGif() {
     try {
@@ -164,20 +159,60 @@ const addToSpotify = async () => {
     }
 };
 
-const getSchedule = () => {
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', '/get-schedule?station=' + selectedStation.value + '&date=' + date.value);
-    xhr.onload = function() {
-        if (xhr.status === 200) {
-            // Process and display the schedule
-            console.log(xhr.response);
-        } else {
-            // Handle error
-            console.error('Error fetching schedule');
-        }
-    };
-    xhr.send();
-}
+const getSchedule = async () => {
+    try {
+        isLoading.value = true;
+        const response = await axios.get('/get-schedule', {
+            params: {
+                station: selectedStation.value,
+                date: date.value
+            }
+        });
+        console.log(response.data.programme_list);
+        programmeList.value = response.data.programme_list;
+        isLoading.value = false;
+    } catch (error) {
+        console.error('Error fetching schedule:', error.response.data);
+        isLoading.value = false;
+    }
+};
+
+const setSelectedProgramme = (programme) => {
+    selectedProgramme.value = programme;
+};
+
+const scrapeSongsFromProgramme = async () => {
+    if (!selectedProgramme.value) {
+        console.error('No programme selected');
+        return;
+    }
+
+    try {
+        isLoading.value = true;
+        // Assuming '/api/scrape-songs' is your endpoint for scraping songs from a given URL
+        const response = await axios.post('/scrape-songs', {
+            link: selectedProgramme.value.link
+        });
+
+        console.log(response.data)
+        
+        scrapedSongs.value = response.data.scraped_songs;
+        isLoading.value = false;
+    } catch (error) {
+        console.error('Error scraping songs:', error.response.data);
+        isLoading.value = false;
+    }
+};
+
+// When the user clicks the search button, call scrapeSongsFromProgramme
+const searchSongs = () => {
+    if (selectedProgramme.value) {
+        scrapeSongsFromProgramme();
+    } else {
+        console.error('No programme selected');
+    }
+};
+
 
 </script>
 
@@ -194,7 +229,7 @@ const getSchedule = () => {
                 <option value="radio_one">Radio 1</option>
                 <option value="radio_one_dance">Radio 1 Dance</option>
                 <option value="radio_one_relax">Radio 1 Relax</option>
-                <option value="radio_one_xtra">Radio 1Xtra</option>
+                <option value="radio_1xtra">Radio 1Xtra</option>
                 <option value="radio_two">Radio 2</option>
                 <option value="radio_three">Radio 3</option>
             </select>
@@ -205,7 +240,7 @@ const getSchedule = () => {
             </div>
 
             <label for="startDate">Date picker</label>
-            <input id="startDate" class="form-control" type="date" v-model="date"/>
+            <input id="startDate" class="form-control" type="date" v-model="date" />
 
             <div class="col-lg-3 offset-5 mt-3">
                 <button class="btn btn-outline-success px-5">Search</button>
@@ -213,7 +248,11 @@ const getSchedule = () => {
         </form>
 
         <div class="col-lg-3 offset-5 mt-3">
-            <button class="btn btn-outline-success px-5" @click="getSchedule()">Get schedule</button>
+            <button class="btn btn-outline-success px-5" @click="getSchedule">Get schedule</button>
+        </div>
+
+        <div class="col-lg-3 offset-5 mt-3">
+            <button class="btn btn-outline-success px-5" @click="searchSongs">Scrape songs</button>
         </div>
 
 
@@ -247,6 +286,11 @@ const getSchedule = () => {
             <SearchPlaylistCards v-for="song in songs" :key="song.id" :title="song.title" :artists="song.artist"
                 :imageUrl="song.imageUrl" :audioUrl="song.previewUrl" :checked="song.checked"
                 @update:checked="updateCheckedState(song, $event)" />
+
+
+            <BBCProgrammeCards v-for="programme in programmeList" :key="programme.link" :title="programme.title"
+                :secondaryTitle="programme.secondaryTitle" :synopsis="programme.synopsis"  :link="programme.link"
+                @checked="setSelectedProgramme" />
 
             <div class="row">
                 <div class="col-lg-3 offset-5 mt-3">
