@@ -7,6 +7,7 @@ const props = defineProps({
     secondaryTitle: String,
     synopsis: String,
     link: String,
+    isSelected: Boolean,
 });
 
 // Define the event that this component can emit
@@ -19,26 +20,28 @@ const checkProgramme = () => {
         title: props.title,
         secondaryTitle: props.secondaryTitle,
         synopsis: props.synopsis,
-        link: props.link
+        link: props.link,
+        isSelected: props.isSelected,
     });
 };
 </script>
 
 <template>
-    <div class="row align-items-center border shadow mt-5 bg-body-tertiary rounded mx-0" @click="checkProgramme">
-        <!-- Set the image column to be smaller and add a right padding -->
+    <div 
+        class="row align-items-center border shadow mt-5 bg-body-tertiary rounded mx-0 programme-card" 
+        :class="{ 'selected': isSelected }" 
+        @click="checkProgramme"
+    >
         <div class="col-md-4 ps-0 pe-2">
             <img id="image" class="rounded" :src="props.image">
         </div>
-        <!-- Set the text column to take up the remaining space and add left padding -->
         <div class="col-md-8 pe-0 ps-2">
-            <p id="card-title">{{ title }}</p>
-            <p id="card-secondary-title"><i>{{ secondaryTitle }}</i></p>
-            <p><i>{{ synopsis }}</i></p>
+            <p id="card-title">{{ props.title }}</p>
+            <p id="card-secondary-title"><i>{{ props.secondaryTitle }}</i></p>
+            <p><i>{{ props.synopsis }}</i></p>
         </div>
     </div>
 </template>
-
 
 
 
@@ -50,7 +53,6 @@ const checkProgramme = () => {
 #image {
     width: 200px;
     height: auto;
-
 }
 
 #card-secondary-title {

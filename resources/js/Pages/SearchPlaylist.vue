@@ -20,7 +20,10 @@ let giphyImage = ref('');
 let programmeList = ref([]);
 let selectedProgramme = ref();
 let scrapedSongs = ref([]);
+let schedule = ref(false);
+let songList = ref(false);
 
+// Sweet alerts for success and fail 
 const failAlert = () => {
     return Swal.fire(
         'Error!',
@@ -37,6 +40,7 @@ const successAlert = () => {
     )
 };
 
+// Scroll to bottom of the page
 const scrollToBottom = () => {
     window.scrollTo({
         top: document.body.scrollHeight,
@@ -44,7 +48,7 @@ const scrollToBottom = () => {
     });
 };
 
-
+// Returns a random 'waiting' gif from giphy whilst the songs are being searched
 async function getRandomGif() {
     try {
         const response = await axios.get('/api/random-gif'); // Adjust the URL based on your actual API endpoint
@@ -54,7 +58,11 @@ async function getRandomGif() {
     }
 };
 
+// Returns selected radio station programme list, user can then select from the list 
+// which programme they want to save to their Spotify account
 const getSchedule = async () => {
+    schedule.value = true;
+    songList.value = false;
     try {
         const response = await axios.get('/get-schedule', {
             params: {
@@ -69,10 +77,14 @@ const getSchedule = async () => {
     }
 };
 
+// Binds to each BBCProgrammeCards component. When clicked, it will save the details of the 
+// card to a variable called selectedProgramme. This is then used later for scraping the songs
 const setSelectedProgramme = (programme) => {
     selectedProgramme.value = programme;
 };
 
+
+// Srcape the songs of the selected programme and save them to scrapedSongs
 const scrapeSongsFromProgramme = async () => {
     if (!selectedProgramme.value) {
         console.error('No programme selected');
@@ -93,9 +105,15 @@ const scrapeSongsFromProgramme = async () => {
     }
 };
 
-// When the user clicks the search button, call scrapeSongsFromProgramme
+// When the user clicks the search button, call scrapeSongsFromProgramme to scrape the songs.
+// Then search the songs on Spotify to retrieve the songs objects
 const searchSongs = async () => {
     if (selectedProgramme.value) {
+        // Hide schedule
+        schedule.value = false;
+        // Show song list
+        songList.value = true;
+        // Wait for songs to be scraped then call retrieveSongInfo
         await scrapeSongsFromProgramme();
         retrieveSongInfo();
     } else {
@@ -103,50 +121,55 @@ const searchSongs = async () => {
     }
 };
 
+
+// Returns the song object from Spotify containing the image, artist/s, title and preview
+// audio. This is saved to an array called songs to be used later
 const retrieveSongInfo = async () => {
 
-checkPlaylistNameIsNotEmpty();
+    checkPlaylistNameIsNotEmpty();
 
-try {
+    try {
 
-    getRandomGif();
-    isLoading.value = true;
-    // Loop through each track and send individual requests
-    const trackDetails = await Promise.all(scrapedSongs.value.map(async (song) => {
-        try {
-            const spotifyResponse = await axios.post('/api/spotify/retrieve-song-info', {
-                artist: song.artist,
-                trackTitle: song.title,
-            });
+        getRandomGif();
+        isLoading.value = true;
+        // Loop through each track and send individual requests
+        const trackDetails = await Promise.all(scrapedSongs.value.map(async (song) => {
+            try {
+                const spotifyResponse = await axios.post('/api/spotify/retrieve-song-info', {
+                    artist: song.artist,
+                    trackTitle: song.title,
+                });
 
-            return {
-                ...song,
-                checked: true,
-                imageUrl: spotifyResponse.data.album.images[0].url,
-                artists: spotifyResponse.data.artists.map(artist => artist.name),
-                title: spotifyResponse.data.name,
-                previewUrl: spotifyResponse.data.preview_url,
-            };
-        } catch (error) {
-            console.error('Error retrieving song info:', error.response.data);
-            return song; // Return the original song if the API call fails
+                return {
+                    ...song,
+                    checked: true,
+                    imageUrl: spotifyResponse.data.album.images[0].url,
+                    artists: spotifyResponse.data.artists.map(artist => artist.name),
+                    title: spotifyResponse.data.name,
+                    previewUrl: spotifyResponse.data.preview_url,
+                };
+            } catch (error) {
+                console.error('Error retrieving song info:', error.response.data);
+                return song; // Return the original song if the API call fails
+            }
+        }));
+
+        // Update the songs array with the returned objects for each song
+        songs.value = trackDetails;
+
+        isLoading.value = false;
+    } catch (error) {
+        // Check if the error comes from axios or fetch and handle accordingly
+        if (error.response) { // This is an axios error
+            console.error('Axios error:', error.response.data);
+        } else { // This is a fetch error
+            console.error('Fetch error:', error.response.data);
         }
-    }));
-
-    // Update the songs array with the returned objects for each song
-    songs.value = trackDetails;
-
-    isLoading.value = false;
-} catch (error) {
-    // Check if the error comes from axios or fetch and handle accordingly
-    if (error.response) { // This is an axios error
-        console.error('Axios error:', error.response.data);
-    } else { // This is a fetch error
-        console.error('Fetch error:', error.response.data);
     }
-}
 };
 
+// Adds the selected songs the ther users Spotify account. It takes the playlist name
+// songs array and passes that to Spotify to create a playlist and populate it with songs
 const addToSpotify = async () => {
 
     if (songs.value.length === 0) return failAlert();
@@ -158,7 +181,7 @@ const addToSpotify = async () => {
         getRandomGif();
 
         isSaving.value = true;
-        const response = await axios.post('api/spotify/add-to-spotify', {
+        await axios.post('api/spotify/add-to-spotify', {
             playlistName: playlistName.value,
             tracks: tracksToAdd,
         });
@@ -175,6 +198,7 @@ const addToSpotify = async () => {
     }
 };
 
+// Updates the checked property of each song when clicked on
 const updateCheckedState = (song, isChecked) => {
     // Find the song in the songs array and update its checked property
     const songToUpdate = songs.value.find(s => s.id === song.id);
@@ -183,13 +207,14 @@ const updateCheckedState = (song, isChecked) => {
     }
 };
 
+// Checks if playlist name is empty
 const checkPlaylistNameIsNotEmpty = () => {
     if (!playlistName.value) {
         return failAlert();
     }
 }
 
-// Function to toggle select all/deselect all
+// Function to toggle select all/deselect all songs an updates the checked property
 const checkAll = () => {
     isCheckAll.value = !isCheckAll.value;
     songs.value.forEach((song) => {
@@ -214,39 +239,39 @@ watchEffect(() => {
     <Head title="Search" />
 
     <MainLayout>
-
-        <form>
-            <select v-model="selectedStation" class="form-select form-select-lg mb-3 text-center"
-                aria-label="Large select example">
-                <option disabled selected>Select a Radio Station</option>
-                <option value="radio_one">Radio 1</option>
-                <option value="radio_one_dance">Radio 1 Dance</option>
-                <option value="radio_one_relax">Radio 1 Relax</option>
-                <option value="radio_1xtra">Radio 1Xtra</option>
-                <option value="radio_two">Radio 2</option>
-                <option value="radio_three">Radio 3</option>
-            </select>
-
-            <div class="input-group input-group-lg">
-                <input v-model="playlistName" type="text" class="form-control" placeholder="Name your playlist"
-                    aria-describedby="inputGroup-sizing-lg">
-            </div>
-
-            <label for="startDate">Date picker</label>
-            <input id="startDate" class="form-control" type="date" v-model="date" />
-        </form>
-
-        <div class="col-lg-3 offset-5 mt-3">
-            <button class="btn btn-outline-success px-5" @click="getSchedule">Get schedule</button>
+        <div class="d-flex justify-content-center">
+            <form>
+                <select v-model="selectedStation" class="form-select form-select-lg mb-3 text-center">
+                    <option disabled selected>Select a Radio Station</option>
+                    <option value="radio_one">Radio 1</option>
+                    <option value="radio_one_dance">Radio 1 Dance</option>
+                    <option value="radio_one_relax">Radio 1 Relax</option>
+                    <option value="radio_1xtra">Radio 1Xtra</option>
+                    <option value="radio_two">Radio 2</option>
+                    <option value="radio_three">Radio 3</option>
+                </select>
+                <div class="ms-5">
+                    <input id="startDate" class="form-control mb-3" type="date" v-model="date" />
+                </div>
+            </form>
         </div>
 
-        <div class="col-lg-3 offset-5 mt-3" @click="searchSongs">
+        <div class="input-group-lg d-flex justify-content-center">
+            <input v-model="playlistName" type="text" class="form-control"
+                placeholder="Name your playlist" aria-describedby="inputGroup-sizing-lg">
+        </div>
+
+        <div class=" mt-3 d-flex justify-content-center">
+            <button class="btn btn-outline-success px-5" @click="getSchedule">Get Radio Station schedule</button>
+        </div>
+
+        <div class="d-flex justify-content-center mt-3" @click="searchSongs">
             <button class="btn btn-outline-success px-5">Search</button>
         </div>
 
         <div v-if="isLoading">
             <button class="btn btn-primary btn-lg status-loading" type="button" disabled>
-                <span class="spinner-grow spinner-grow-sm" aria-hidden="true"></span>
+                <span class="spinner-grow spinner-grow-sm me-2" aria-hidden="true"></span>
                 <span role="status">Loading...</span>
             </button>
 
@@ -260,7 +285,7 @@ watchEffect(() => {
                 ↓
             </button>
 
-            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+            <div v-if="songList" class="btn-group d-flex col-lg-3 col-md-4 mx-auto mt-3" role="group" aria-label="Basic radio toggle button group">
                 <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off"
                     :checked="!isCheckAll" @change="checkAll">
                 <label class="btn btn-outline-primary" for="btnradio1">Deselect all</label>
@@ -270,26 +295,38 @@ watchEffect(() => {
                 <label class="btn btn-outline-primary" for="btnradio2">Select all </label>
             </div>
 
+            <div v-if="songList">
+                <SearchPlaylistCards v-for="song in songs" 
+                    :key="song.id" 
+                    :title="song.title" 
+                    :artists="song.artist"
+                    :imageUrl="song.imageUrl" 
+                    :audioUrl="song.previewUrl" 
+                    :checked="song.checked"
+                    @update:checked="updateCheckedState(song, $event)" 
+                />
+            </div>
 
-            <SearchPlaylistCards v-for="song in songs" :key="song.id" :title="song.title" :artists="song.artist"
-                :imageUrl="song.imageUrl" :audioUrl="song.previewUrl" :checked="song.checked"
-                @update:checked="updateCheckedState(song, $event)" />
+            <div v-if="schedule" :class="{ 'has-selection': selectedProgramme }">
+                <BBCProgrammeCards v-for="programme in programmeList" 
+                    :key="programme.link" 
+                    :title="programme.title"
+                    :secondaryTitle="programme.secondaryTitle" 
+                    :synopsis="programme.synopsis" 
+                    :link="programme.link"
+                    :image="programme.image" 
+                    :isSelected="selectedProgramme === programme"
+                    @checked="setSelectedProgramme(programme)" />
+            </div>
 
-
-            <BBCProgrammeCards v-for="programme in programmeList" :key="programme.link" :title="programme.title"
-                :secondaryTitle="programme.secondaryTitle" :synopsis="programme.synopsis" :link="programme.link"
-                :image="programme.image" @checked="setSelectedProgramme" />
-
-            <div class="row">
-                <div class="col-lg-3 offset-5 mt-3">
-                    <button id="add-to-spotify" class="btn btn-secondary btn-lg mt-5" @click="addToSpotify">Add to
-                        Spotify</button>
-                </div>
+            <div v-if="songList" class="d-flex justify-content-center mt-3">
+                <button id="add-to-spotify" class="btn btn-secondary btn-lg mt-5" @click="addToSpotify">Add to
+                    Spotify</button>
             </div>
 
             <div v-if="isSaving">
                 <button class="btn btn-primary btn-lg status-saving" type="button" disabled>
-                    <span class="spinner-grow spinner-grow-sm" aria-hidden="true"></span>
+                    <span class="spinner-grow spinner-grow-sm me-2" aria-hidden="true"></span>
                     <span role="status">Saving...</span>
                 </button>
 
@@ -316,8 +353,6 @@ watchEffect(() => {
 #add-to-spotify {
     background-color: rgb(5, 180, 34);
     border-color: rgb(5, 180, 34);
-    position: relative;
-    right: 0.9rem;
 }
 
 #add-to-spotify:hover {
@@ -336,8 +371,30 @@ watchEffect(() => {
     margin-top: 2rem;
 }
 
-.giphy-image {
+.giphy-image,
+#playlist-name {
     display: flex;
     justify-content: center;
+}
+
+.form-control {
+    width: auto;
+}
+
+.programme-card {
+    transition: opacity 0.3s ease;
+    opacity: 1;
+}
+
+/* When a card is selected, only then apply the dimming effect to others */
+.has-selection .programme-card:not(.selected) {
+    opacity: 0.5;
+    /* Dim other cards */
+}
+
+/* Highlight the selected card */
+.programme-card.selected {
+    background-color: #e9ecef;
+    /* Highlight color for the selected card */
 }
 </style>
