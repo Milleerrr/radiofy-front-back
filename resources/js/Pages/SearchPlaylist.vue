@@ -230,35 +230,51 @@ watchEffect(() => {
     <Head title="Search" />
 
     <MainLayout>
-        <div class="d-flex justify-content-center">
-            <form>
-                <select v-model="selectedStation" class="form-select form-select-lg mb-3 text-center">
-                    <option disabled selected>Select a Radio Station</option>
-                    <option value="radio_one">Radio 1</option>
-                    <option value="radio_one_dance">Radio 1 Dance</option>
-                    <option value="radio_one_relax">Radio 1 Relax</option>
-                    <option value="radio_1xtra">Radio 1Xtra</option>
-                    <option value="radio_two">Radio 2</option>
-                    <option value="radio_three">Radio 3</option>
-                </select>
-                <div class="ms-5">
-                    <input id="startDate" class="form-control mb-3" type="date" v-model="date" />
+        <div class="container mt-5">
+            <div class="row justify-content-md-center">
+                <div class="col-md-auto">
+                    <form>
+
+                        <!-- Radio Station Selector -->
+                        <div class="mb-3">
+                            <select v-model="selectedStation" class="form-select form-select-lg">
+                                <option disabled selected>Select a Radio Station</option>
+                                <option value="radio_one">Radio 1</option>
+                                <option value="radio_one_dance">Radio 1 Dance</option>
+                                <option value="radio_one_relax">Radio 1 Relax</option>
+                                <option value="1xtra">Radio 1Xtra</option>
+                                <option value="radio_two">Radio 2</option>
+                                <option value="radio_three">Radio 3</option>
+                            </select>
+                        </div>
+
+                        <!-- Date Picker -->
+                        <div class="mb-3">
+                            <input id="startDate" class="form-control form-control-lg" type="date" v-model="date" />
+                        </div>
+
+                        <!-- Playlist Name Input -->
+                        <div class="mb-3">
+                            <input v-model="playlistName" type="text" class="form-control form-control-lg"
+                                placeholder="Name your playlist" aria-label="Playlist name">
+                        </div>
+
+                        <!-- Get Schedule Button -->
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-success btn-lg" type="button" @click="getSchedule">Get Radio Station
+                                Schedule</button>
+                        </div>
+
+                        <!-- Search Button -->
+                        <div class="d-grid gap-2 mt-3">
+                            <button class="btn btn-success btn-lg" type="button" @click="searchSongs">Search</button>
+                        </div>
+
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
 
-        <div class="input-group-lg d-flex justify-content-center">
-            <input v-model="playlistName" type="text" class="form-control" placeholder="Name your playlist"
-                aria-describedby="inputGroup-sizing-lg">
-        </div>
-
-        <div class=" mt-3 d-flex justify-content-center">
-            <button class="btn btn-outline-success px-5" @click="getSchedule">Get Radio Station schedule</button>
-        </div>
-
-        <div class="d-flex justify-content-center mt-3" @click="searchSongs">
-            <button class="btn btn-outline-success px-5">Search</button>
-        </div>
 
         <div v-if="isLoading">
             <button class="btn btn-primary btn-lg status-loading" type="button" disabled>

@@ -215,5 +215,6 @@ watchEffect(() => {
         background: rgb(5, 180, 34);
         box-shadow: 0 -72px 0 -20px transparent, 64px -32px 0 -20px transparent, 64px 32px 0 -20px transparent, 0 72px 0 -20px transparent, -64px 32px 0 -20px transparent, -64px -32px 0 -20px transparent;
     }
-}</style>
+}
+</style>
   
