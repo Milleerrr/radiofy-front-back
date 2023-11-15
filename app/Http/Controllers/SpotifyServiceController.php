@@ -129,29 +129,30 @@ class SpotifyServiceController extends Controller
 
     public function retrieveSongInfo(Request $request)
     {
-        $user = Auth::user();
-        if (!$user) {
-            return response()->json(['message' => 'User not authenticated'], 401);
-        }
-
+        // Validate that we have an array of songs, each with an artist and trackTitle
         $request->validate([
-            'artist' => 'required|string',
-            'trackTitle' => 'required|string',
+            'songs.*.artist' => 'required|string',
+            'songs.*.trackTitle' => 'required|string',
         ]);
 
-        $artist = $request->input('artist');
-        $trackTitle = $request->input('trackTitle');
+        $songs = $request->input('songs');
+        $accessToken = $this->spotifyService->getSpotifyAccessToken(Auth::user());
+        $tracksInfo = [];
 
-        $accessToken = $this->spotifyService->getSpotifyAccessToken($user);
+        foreach ($songs as $song) {
+            $track = $this->spotifyService->searchTrackOnSpotify($accessToken, $song['artist'], $song['trackTitle']);
 
-        $track = $this->spotifyService->searchTrackOnSpotify($accessToken, $artist, $trackTitle);
-
-        if (!$track) {
-            return response()->json(['message' => 'Track not found'], 404);
+            if ($track) {
+                // If the track is found, add it to the tracks info array
+                $tracksInfo[] = $track;
+            } else {
+                // If a track is not found, you might want to handle it differently.
+                // For this example, we'll just add a message indicating failure.
+                $tracksInfo[] = ['message' => 'Track not found', 'artist' => $song['artist'], 'trackTitle' => $song['trackTitle']];
+            }
         }
 
-        // You may want to log the track or do something with it here.
-        // For now, we'll just return it.
-        return response()->json($track);
+        // Return the array of track information
+        return response()->json($tracksInfo);
     }
 }

@@ -56,5 +56,5 @@ Route::get('/login/spotify/callback', [LoginController::class, 'redirectToSpotif
 
 Route::get('/get-schedule', [BBCSoundsController::class, 'getSchedule']);
 
-Route::post('/scrape-songs', [BBCSoundsController::class, 'getProgrammeTracks']);
+Route::any('/scrape-songs', [BBCSoundsController::class, 'getProgrammeTracks']);
 

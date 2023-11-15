@@ -6,7 +6,7 @@ const props = defineProps({
     artists: String,
     imageUrl: String,
     audioUrl: String,
-    checked: Boolean
+    checked: Boolean,
 });
 
 const emits = defineEmits(['update:checked']);
@@ -42,8 +42,8 @@ watchEffect(() => {
         <div class="col-md-2">
             <div class="checkbox-wrapper-12">
                 <div class="cbx">
-                    <input id="cbx-12" type="checkbox" v-model="isChecked" @change="$emit('update:checked')" />
-                    <label for="cbx-12"></label>
+                    <input :id="props.id" type="checkbox" v-model="isChecked" @change="$emit('update:checked', $event.target.checked)" />
+                    <label :for="props.id"></label>
                     <svg width="30" height="30" viewBox="0 0 15 14" fill="none">
                         <path d="M2 8.36364L6.23077 12L13 2"></path>
                     </svg>

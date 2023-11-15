@@ -70,7 +70,6 @@ const getSchedule = async () => {
                 date: date.value
             }
         });
-        console.log(response.data.programme_list);
         programmeList.value = response.data.programme_list;
     } catch (error) {
         console.error('Error fetching schedule:', error.response.data);
@@ -97,8 +96,6 @@ const scrapeSongsFromProgramme = async () => {
             link: selectedProgramme.value.link
         });
 
-        console.log(response.data)
-
         scrapedSongs.value = response.data.scraped_songs;
     } catch (error) {
         console.error('Error scraping songs:', error.response.data);
@@ -122,36 +119,30 @@ const searchSongs = async () => {
 };
 
 
-// Returns the song object from Spotify containing the image, artist/s, title and preview
-// audio. This is saved to an array called songs to be used later
 const retrieveSongInfo = async () => {
 
     checkPlaylistNameIsNotEmpty();
 
     try {
-
         getRandomGif();
         isLoading.value = true;
-        // Loop through each track and send individual requests
-        const trackDetails = await Promise.all(scrapedSongs.value.map(async (song) => {
-            try {
-                const spotifyResponse = await axios.post('/api/spotify/retrieve-song-info', {
-                    artist: song.artist,
-                    trackTitle: song.title,
-                });
 
-                return {
-                    ...song,
-                    checked: true,
-                    imageUrl: spotifyResponse.data.album.images[0].url,
-                    artists: spotifyResponse.data.artists.map(artist => artist.name),
-                    title: spotifyResponse.data.name,
-                    previewUrl: spotifyResponse.data.preview_url,
-                };
-            } catch (error) {
-                console.error('Error retrieving song info:', error.response.data);
-                return song; // Return the original song if the API call fails
-            }
+        // Make a single request with all songs
+        const spotifyResponse = await axios.post('/api/spotify/retrieve-song-info', {
+            songs: scrapedSongs.value.map(song => ({
+                artist: song.artist,
+                trackTitle: song.title,
+            })),
+        });
+
+        // Assume spotifyResponse.data is an array of song details corresponding to each song
+        const trackDetails = spotifyResponse.data.map((songDetails, index) => ({
+            ...scrapedSongs.value[index],
+            checked: true,
+            imageUrl: songDetails.album.images[0].url,
+            artists: songDetails.artists.map(artist => artist.name),
+            title: songDetails.name,
+            previewUrl: songDetails.preview_url,
         }));
 
         // Update the songs array with the returned objects for each song
@@ -159,14 +150,12 @@ const retrieveSongInfo = async () => {
 
         isLoading.value = false;
     } catch (error) {
-        // Check if the error comes from axios or fetch and handle accordingly
-        if (error.response) { // This is an axios error
-            console.error('Axios error:', error.response.data);
-        } else { // This is a fetch error
-            console.error('Fetch error:', error.response.data);
-        }
+        // Handle errors
+        isLoading.value = false;
+        console.error('Error retrieving song info:', error.response.data);
     }
 };
+
 
 // Adds the selected songs the ther users Spotify account. It takes the playlist name
 // songs array and passes that to Spotify to create a playlist and populate it with songs
@@ -175,12 +164,14 @@ const addToSpotify = async () => {
     if (songs.value.length === 0) return failAlert();
     // Filter the songs that are checked
     const tracksToAdd = songs.value.filter(song => song.checked);
+
     try {
 
         checkPlaylistNameIsNotEmpty();
         getRandomGif();
 
         isSaving.value = true;
+
         await axios.post('api/spotify/add-to-spotify', {
             playlistName: playlistName.value,
             tracks: tracksToAdd,
@@ -192,7 +183,7 @@ const addToSpotify = async () => {
 
     } catch (error) {
         console.error('Error adding to Spotify:', error.response.data);
-
+        isSaving.value = false;
         // Use SweetAlert to show an error message
         failAlert();
     }
@@ -257,8 +248,8 @@ watchEffect(() => {
         </div>
 
         <div class="input-group-lg d-flex justify-content-center">
-            <input v-model="playlistName" type="text" class="form-control"
-                placeholder="Name your playlist" aria-describedby="inputGroup-sizing-lg">
+            <input v-model="playlistName" type="text" class="form-control" placeholder="Name your playlist"
+                aria-describedby="inputGroup-sizing-lg">
         </div>
 
         <div class=" mt-3 d-flex justify-content-center">
@@ -285,7 +276,8 @@ watchEffect(() => {
                 ↓
             </button>
 
-            <div v-if="songList" class="btn-group d-flex col-lg-3 col-md-4 mx-auto mt-3" role="group" aria-label="Basic radio toggle button group">
+            <div v-if="songList" class="btn-group d-flex col-lg-3 col-md-4 mx-auto mt-3" role="group"
+                aria-label="Basic radio toggle button group">
                 <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off"
                     :checked="!isCheckAll" @change="checkAll">
                 <label class="btn btn-outline-primary" for="btnradio1">Deselect all</label>
@@ -296,26 +288,15 @@ watchEffect(() => {
             </div>
 
             <div v-if="songList">
-                <SearchPlaylistCards v-for="song in songs" 
-                    :key="song.id" 
-                    :title="song.title" 
-                    :artists="song.artist"
-                    :imageUrl="song.imageUrl" 
-                    :audioUrl="song.previewUrl" 
-                    :checked="song.checked"
-                    @update:checked="updateCheckedState(song, $event)" 
-                />
+                <SearchPlaylistCards v-for="song in songs" :key="song.id" :title="song.title" :artists="song.artist"
+                    :imageUrl="song.imageUrl" :audioUrl="song.previewUrl" :checked="song.checked"
+                    @update:checked="updateCheckedState(song, $event)" />
             </div>
 
             <div v-if="schedule" :class="{ 'has-selection': selectedProgramme }">
-                <BBCProgrammeCards v-for="programme in programmeList" 
-                    :key="programme.link" 
-                    :title="programme.title"
-                    :secondaryTitle="programme.secondaryTitle" 
-                    :synopsis="programme.synopsis" 
-                    :link="programme.link"
-                    :image="programme.image" 
-                    :isSelected="selectedProgramme === programme"
+                <BBCProgrammeCards v-for="programme in programmeList" :key="programme.link" :title="programme.title"
+                    :secondaryTitle="programme.secondaryTitle" :synopsis="programme.synopsis" :link="programme.link"
+                    :image="programme.image" :isSelected="selectedProgramme === programme"
                     @checked="setSelectedProgramme(programme)" />
             </div>
 

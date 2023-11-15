@@ -27,15 +27,16 @@ Route::middleware('auth:sanctum')->group(function () {
         return fake()->name();
     })->name('api.name')->can('getName', User::class);
 
+
+    // Then create playlists once tracks have been found 
+    Route::post('/spotify/add-to-spotify', [SpotifyServiceController::class, 'addToSpotify'])
+        ->name('spotify.add-to-spotify');
+
+
+    Route::post('/spotify/retrieve-song-info', [SpotifyServiceController::class, 'retrieveSongInfo'])
+        ->name('spotify.retrieve-song-info');
+
 }); 
-
-// Then create playlists once tracks have been found 
-Route::post('/spotify/add-to-spotify', [SpotifyServiceController::class, 'addToSpotify'])
-    ->name('spotify.add-to-spotify');
-
-
-Route::post('/spotify/retrieve-song-info', [SpotifyServiceController::class, 'retrieveSongInfo'])
-    ->name('spotify.retrieve-song-info');
 
 Route::get('/random-gif', [GifController::class,'getRandomGif'])
     ->name('radom.gif');
