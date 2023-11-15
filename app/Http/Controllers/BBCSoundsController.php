@@ -72,8 +72,11 @@ class BBCSoundsController extends Controller
             // The synopsis or description might be in a 'p' with the class 'sc-c-metadata__synopsis'
             $synopsis = $node->filter('.sc-c-metadata__synopsis')->text();
 
+            $image = $node->filter('img')->attr('src');
+
             // Add the track details to the tracks data array
             $tracksData[] = [
+                'image' => trim($image),
                 'title' => trim($title),
                 'secondaryTitle' => trim($secondaryTitle),
                 'synopsis' => trim($synopsis),
@@ -95,8 +98,6 @@ class BBCSoundsController extends Controller
         ]);
 
         $response = Http::get($url);
-
-        return $response;
 
         if ($response->successful()) {
             $htmlContent = $response->body();

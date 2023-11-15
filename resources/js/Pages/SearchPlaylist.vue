@@ -44,50 +44,6 @@ const scrollToBottom = () => {
     });
 };
 
-const retrieveSongInfo = async () => {
-
-    checkPlaylistNameIsNotEmpty();
-
-    try {
-        // Fetch playlist from JSON file
-
-        getRandomGif();
-        isLoading.value = true;
-        // Loop through each track and send individual requests
-        const trackDetails = await Promise.all(scrapedSongs.value.map(async (song) => {
-            try {
-                const spotifyResponse = await axios.post('/api/spotify/retrieve-song-info', {
-                    artist: song.artist,
-                    trackTitle: song.title,
-                });
-
-                return {
-                    ...song,
-                    checked: true,
-                    imageUrl: spotifyResponse.data.album.images[0].url,
-                    artists: spotifyResponse.data.artists.map(artist => artist.name),
-                    title: spotifyResponse.data.name,
-                    previewUrl: spotifyResponse.data.preview_url,
-                };
-            } catch (error) {
-                console.error('Error retrieving song info:', error.response.data);
-                return song; // Return the original song if the API call fails
-            }
-        }));
-
-        // Update the songs array with the returned objects for each song
-        songs.value = trackDetails;
-
-        isLoading.value = false;
-    } catch (error) {
-        // Check if the error comes from axios or fetch and handle accordingly
-        if (error.response) { // This is an axios error
-            console.error('Axios error:', error.response.data);
-        } else { // This is a fetch error
-            console.error('Fetch error:', error.response.data);
-        }
-    }
-};
 
 async function getRandomGif() {
     try {
@@ -98,6 +54,126 @@ async function getRandomGif() {
     }
 };
 
+const getSchedule = async () => {
+    try {
+        const response = await axios.get('/get-schedule', {
+            params: {
+                station: selectedStation.value,
+                date: date.value
+            }
+        });
+        console.log(response.data.programme_list);
+        programmeList.value = response.data.programme_list;
+    } catch (error) {
+        console.error('Error fetching schedule:', error.response.data);
+    }
+};
+
+const setSelectedProgramme = (programme) => {
+    selectedProgramme.value = programme;
+};
+
+const scrapeSongsFromProgramme = async () => {
+    if (!selectedProgramme.value) {
+        console.error('No programme selected');
+        return;
+    }
+
+    try {
+        // Assuming '/api/scrape-songs' is your endpoint for scraping songs from a given URL
+        const response = await axios.post('/scrape-songs', {
+            link: selectedProgramme.value.link
+        });
+
+        console.log(response.data)
+
+        scrapedSongs.value = response.data.scraped_songs;
+    } catch (error) {
+        console.error('Error scraping songs:', error.response.data);
+    }
+};
+
+// When the user clicks the search button, call scrapeSongsFromProgramme
+const searchSongs = async () => {
+    if (selectedProgramme.value) {
+        await scrapeSongsFromProgramme();
+        retrieveSongInfo();
+    } else {
+        console.error('No programme selected');
+    }
+};
+
+const retrieveSongInfo = async () => {
+
+checkPlaylistNameIsNotEmpty();
+
+try {
+
+    getRandomGif();
+    isLoading.value = true;
+    // Loop through each track and send individual requests
+    const trackDetails = await Promise.all(scrapedSongs.value.map(async (song) => {
+        try {
+            const spotifyResponse = await axios.post('/api/spotify/retrieve-song-info', {
+                artist: song.artist,
+                trackTitle: song.title,
+            });
+
+            return {
+                ...song,
+                checked: true,
+                imageUrl: spotifyResponse.data.album.images[0].url,
+                artists: spotifyResponse.data.artists.map(artist => artist.name),
+                title: spotifyResponse.data.name,
+                previewUrl: spotifyResponse.data.preview_url,
+            };
+        } catch (error) {
+            console.error('Error retrieving song info:', error.response.data);
+            return song; // Return the original song if the API call fails
+        }
+    }));
+
+    // Update the songs array with the returned objects for each song
+    songs.value = trackDetails;
+
+    isLoading.value = false;
+} catch (error) {
+    // Check if the error comes from axios or fetch and handle accordingly
+    if (error.response) { // This is an axios error
+        console.error('Axios error:', error.response.data);
+    } else { // This is a fetch error
+        console.error('Fetch error:', error.response.data);
+    }
+}
+};
+
+const addToSpotify = async () => {
+
+    if (songs.value.length === 0) return failAlert();
+    // Filter the songs that are checked
+    const tracksToAdd = songs.value.filter(song => song.checked);
+    try {
+
+        checkPlaylistNameIsNotEmpty();
+        getRandomGif();
+
+        isSaving.value = true;
+        const response = await axios.post('api/spotify/add-to-spotify', {
+            playlistName: playlistName.value,
+            tracks: tracksToAdd,
+        });
+
+        isSaving.value = false;
+        // Use SweetAlert to show a success message
+        successAlert();
+
+    } catch (error) {
+        console.error('Error adding to Spotify:', error.response.data);
+
+        // Use SweetAlert to show an error message
+        failAlert();
+    }
+};
 
 const updateCheckedState = (song, isChecked) => {
     // Find the song in the songs array and update its checked property
@@ -131,89 +207,6 @@ watchEffect(() => {
     updateCheckall();
 });
 
-const addToSpotify = async () => {
-
-    if (songs.value.length === 0) return failAlert();
-    // Filter the songs that are checked
-    const tracksToAdd = songs.value.filter(song => song.checked);
-    try {
-
-        checkPlaylistNameIsNotEmpty();
-        getRandomGif();
-
-        isSaving.value = true;
-        const response = await axios.post('api/spotify/add-to-spotify', {
-            playlistName: playlistName.value,
-            tracks: tracksToAdd,
-        });
-
-        isSaving.value = false;
-        // Use SweetAlert to show a success message
-        successAlert();
-
-    } catch (error) {
-        console.error('Error adding to Spotify:', error.response.data);
-
-        // Use SweetAlert to show an error message
-        failAlert();
-    }
-};
-
-const getSchedule = async () => {
-    try {
-        isLoading.value = true;
-        const response = await axios.get('/get-schedule', {
-            params: {
-                station: selectedStation.value,
-                date: date.value
-            }
-        });
-        console.log(response.data.programme_list);
-        programmeList.value = response.data.programme_list;
-        isLoading.value = false;
-    } catch (error) {
-        console.error('Error fetching schedule:', error.response.data);
-        isLoading.value = false;
-    }
-};
-
-const setSelectedProgramme = (programme) => {
-    selectedProgramme.value = programme;
-};
-
-const scrapeSongsFromProgramme = async () => {
-    if (!selectedProgramme.value) {
-        console.error('No programme selected');
-        return;
-    }
-
-    try {
-        isLoading.value = true;
-        // Assuming '/api/scrape-songs' is your endpoint for scraping songs from a given URL
-        const response = await axios.post('/scrape-songs', {
-            link: selectedProgramme.value.link
-        });
-
-        console.log(response.data)
-        
-        scrapedSongs.value = response.data.scraped_songs;
-        isLoading.value = false;
-    } catch (error) {
-        console.error('Error scraping songs:', error.response.data);
-        isLoading.value = false;
-    }
-};
-
-// When the user clicks the search button, call scrapeSongsFromProgramme
-const searchSongs = () => {
-    if (selectedProgramme.value) {
-        scrapeSongsFromProgramme();
-    } else {
-        console.error('No programme selected');
-    }
-};
-
-
 </script>
 
 
@@ -222,7 +215,7 @@ const searchSongs = () => {
 
     <MainLayout>
 
-        <form @submit.prevent="retrieveSongInfo">
+        <form>
             <select v-model="selectedStation" class="form-select form-select-lg mb-3 text-center"
                 aria-label="Large select example">
                 <option disabled selected>Select a Radio Station</option>
@@ -241,20 +234,15 @@ const searchSongs = () => {
 
             <label for="startDate">Date picker</label>
             <input id="startDate" class="form-control" type="date" v-model="date" />
-
-            <div class="col-lg-3 offset-5 mt-3">
-                <button class="btn btn-outline-success px-5">Search</button>
-            </div>
         </form>
 
         <div class="col-lg-3 offset-5 mt-3">
             <button class="btn btn-outline-success px-5" @click="getSchedule">Get schedule</button>
         </div>
 
-        <div class="col-lg-3 offset-5 mt-3">
-            <button class="btn btn-outline-success px-5" @click="searchSongs">Scrape songs</button>
+        <div class="col-lg-3 offset-5 mt-3" @click="searchSongs">
+            <button class="btn btn-outline-success px-5">Search</button>
         </div>
-
 
         <div v-if="isLoading">
             <button class="btn btn-primary btn-lg status-loading" type="button" disabled>
@@ -289,8 +277,8 @@ const searchSongs = () => {
 
 
             <BBCProgrammeCards v-for="programme in programmeList" :key="programme.link" :title="programme.title"
-                :secondaryTitle="programme.secondaryTitle" :synopsis="programme.synopsis"  :link="programme.link"
-                @checked="setSelectedProgramme" />
+                :secondaryTitle="programme.secondaryTitle" :synopsis="programme.synopsis" :link="programme.link"
+                :image="programme.image" @checked="setSelectedProgramme" />
 
             <div class="row">
                 <div class="col-lg-3 offset-5 mt-3">
