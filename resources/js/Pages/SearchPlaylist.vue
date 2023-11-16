@@ -121,8 +121,6 @@ const searchSongs = async () => {
 
 const retrieveSongInfo = async () => {
 
-    checkPlaylistNameIsNotEmpty();
-
     try {
         getRandomGif();
         isLoading.value = true;
@@ -167,7 +165,6 @@ const addToSpotify = async () => {
 
     try {
 
-        checkPlaylistNameIsNotEmpty();
         getRandomGif();
 
         isSaving.value = true;

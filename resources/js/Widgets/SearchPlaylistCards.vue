@@ -21,63 +21,59 @@ watchEffect(() => {
 </script>
 
 <template>
-
-    <div class="row align-items-center border shadow mt-5 bg-body-tertiary rounded mx-0">
-        <div class="col-md-5 ps-0">
-            <img id="song-img" class="rounded" :src="props.imageUrl">
-        </div>
-        <div class="col-md-5">
-            <p id="card-title">{{ props.title }}</p>
-            <p id="card-artist"><i>{{ props.artists }}</i></p>
-            <div v-if="props.audioUrl">
-                <audio controls>
-                    <source type="audio/mp3" :src="props.audioUrl">
-                    Your browser does not support the audio element.
-                </audio>
-            </div>
-            <div v-else>
-                <span>No audio preview available for this song</span>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="checkbox-wrapper-12">
-                <div class="cbx">
-                    <input :id="props.id" type="checkbox" v-model="isChecked" @change="$emit('update:checked', $event.target.checked)" />
-                    <label :for="props.id"></label>
-                    <svg width="30" height="30" viewBox="0 0 15 14" fill="none">
-                        <path d="M2 8.36364L6.23077 12L13 2"></path>
-                    </svg>
+    <div class="d-flex justify-content-center align-items-center py-3">
+        <div class="card border shadow bg-body rounded w-100 mx-auto" style="max-width: 740px;">
+            <div class="row g-0">
+                <div class="col-md-4">
+                    <img :src="props.imageUrl" class="img-fluid rounded" alt="Song image">
                 </div>
-                <!-- Gooey-->
-                <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
-                    <defs>
-                        <filter id="goo-12">
-                            <fegaussianblur in="SourceGraphic" stddeviation="4" result="blur"></fegaussianblur>
-                            <fecolormatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -7"
-                                result="goo-12"></fecolormatrix>
-                            <feblend in="SourceGraphic" in2="goo-12"></feblend>
-                        </filter>
-                    </defs>
-                </svg>
+                <div class="col-md-7">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ props.title }}</h5>
+                        <p class="card-text"><small class="text-muted">{{ props.artists }}</small></p>
+                        <div v-if="props.audioUrl" class="mt-2">
+                            <!-- Adjust audio player width on larger screens -->
+                            <audio controls class="w-100 md:w-auto">
+                                <source type="audio/mp3" :src="props.audioUrl">
+                                Your browser does not support the audio element.
+                            </audio>
+                        </div>
+                        <div v-else class="mt-2">
+                            <span>No audio preview available for this song</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-1 d-flex align-items-center justify-content-center">
+                    <div class="checkbox-wrapper-12">
+                        <div class="cbx">
+                            <input :id="props.id" type="checkbox" v-model="isChecked"
+                                @change="$emit('update:checked', $event.target.checked)" />
+                            <label :for="props.id"></label>
+                            <svg width="30" height="30" viewBox="0 0 15 14" fill="none">
+                                <path d="M2 8.36364L6.23077 12L13 2"></path>
+                            </svg>
+                        </div>
+                        <!-- Gooey-->
+                        <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+                            <defs>
+                                <filter id="goo-12">
+                                    <fegaussianblur in="SourceGraphic" stddeviation="4" result="blur">
+                                    </fegaussianblur>
+                                    <fecolormatrix in="blur" mode="matrix"
+                                        values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -7" result="goo-12">
+                                    </fecolormatrix>
+                                    <feblend in="SourceGraphic" in2="goo-12"></feblend>
+                                </filter>
+                            </defs>
+                        </svg>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <style scoped>
-#song-img {
-    width: 60%;
-    height: auto;
-}
-
-#card-title {
-    font-size: 2.25rem;
-}
-
-#card-artist {
-    font-size: 1.5rem;
-}
-
 .checkbox-wrapper-12 {
     position: relative;
 }
@@ -139,10 +135,10 @@ watchEffect(() => {
 }
 
 .checkbox-wrapper-12 .cbx svg {
-    position: absolute;
+    position: relative;
     top: 50%;
     /* Center vertically */
-    left: 15%;
+    left: 50%;
     /* Center horizontally */
     transform: translate(-50%, -50%);
     /* Adjust for exact centering */

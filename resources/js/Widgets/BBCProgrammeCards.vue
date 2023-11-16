@@ -27,36 +27,26 @@ const checkProgramme = () => {
 </script>
 
 <template>
-    <div 
-        class="row align-items-center border shadow mt-5 bg-body-tertiary rounded mx-0 programme-card" 
-        :class="{ 'selected': isSelected }" 
-        @click="checkProgramme"
-    >
-        <div class="col-md-4 ps-0 pe-2">
-            <img id="image" class="rounded" :src="props.image">
+    <div class="d-flex justify-content-center align-items-center py-3 programme-card"  :class="{ 'selected': isSelected }" 
+        @click="checkProgramme"> <!-- Center the card in the container -->
+      <div class="card border shadow bg-body rounded w-100 mx-auto" style="max-width: 740px;"> <!-- Set max width for larger screens -->
+        <div class="row g-0"> <!-- Bootstrap's grid system -->
+          <div class="col-md-4"> <!-- Image takes up 4 out of 12 columns on medium screens -->
+            <img :src="props.image" class="img-fluid rounded-start" alt="Programme image"> <!-- Responsive image with rounded corners on the left -->
+          </div>
+          <div class="col-md-8"> <!-- Content takes up the remaining 8 out of 12 columns on medium screens -->
+            <div class="card-body">
+              <h5 class="card-title">{{ props.title }}</h5> <!-- Title -->
+              <p class="card-text"><small class="text-muted">{{ props.secondaryTitle }}</small></p> <!-- Secondary title -->
+              <p class="card-text">{{ props.synopsis }}</p> <!-- Synopsis -->
+            </div>
+          </div>
         </div>
-        <div class="col-md-8 pe-0 ps-2">
-            <p id="card-title">{{ props.title }}</p>
-            <p id="card-secondary-title"><i>{{ props.secondaryTitle }}</i></p>
-            <p><i>{{ props.synopsis }}</i></p>
-        </div>
+      </div>
     </div>
-</template>
-
+  </template>
 
 
 <style scoped>
-#card-title {
-    font-size: 2.25rem;
-}
-
-#image {
-    width: 200px;
-    height: auto;
-}
-
-#card-secondary-title {
-    font-size: 1.5rem;
-}
 
 </style>

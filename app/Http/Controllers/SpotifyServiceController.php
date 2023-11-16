@@ -129,11 +129,6 @@ class SpotifyServiceController extends Controller
 
     public function retrieveSongInfo(Request $request)
     {
-        // Validate that we have an array of songs, each with an artist and trackTitle
-        $request->validate([
-            'songs.*.artist' => 'required|string',
-            'songs.*.trackTitle' => 'required|string',
-        ]);
 
         $songs = $request->input('songs');
         $accessToken = $this->spotifyService->getSpotifyAccessToken(Auth::user());
