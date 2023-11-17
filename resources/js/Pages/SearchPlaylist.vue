@@ -141,6 +141,7 @@ const retrieveSongInfo = async () => {
             artists: songDetails.artists.map(artist => artist.name),
             title: songDetails.name,
             previewUrl: songDetails.preview_url,
+            spotifyUri: songDetails.uri,
         }));
 
         // Update the songs array with the returned objects for each song

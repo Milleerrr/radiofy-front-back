@@ -95,14 +95,18 @@ class BBCSoundsController extends Controller
 
         $request->validate([
             'link' => 'required|string',
+            // 'playlistId' => 'required|string'
         ]);
 
         $response = Http::get($url);
 
+        $urlParts = explode('/', $url);
+        $programmeId = end($urlParts); 
+
         if ($response->successful()) {
             $htmlContent = $response->body();
             // Parse the HTML content
-            $parsedContent = $this->parseProgrammeTracks($htmlContent); // Make sure this is the correct method name
+            $parsedContent = $this->parseProgrammeTracks($htmlContent, $programmeId); // Make sure this is the correct method name
 
             // Return the parsed content data
             // Use JSON_UNESCAPED_SLASHES to prevent escaping slashes in URLs
@@ -117,7 +121,7 @@ class BBCSoundsController extends Controller
         }
     }
 
-    public function parseProgrammeTracks($htmlContent)
+    public function parseProgrammeTracks($htmlContent, $programmeId)
     {
         $crawler = new Crawler($htmlContent);
 
@@ -160,6 +164,7 @@ class BBCSoundsController extends Controller
             $secondary = $track['titles']['secondary'] ?? '';
 
             $tracksData[] = [
+                'programme_id' => $programmeId,
                 'artist' => trim($primary),
                 'title' => trim($secondary),
             ];

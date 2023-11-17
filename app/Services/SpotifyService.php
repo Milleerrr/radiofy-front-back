@@ -75,12 +75,11 @@ class SpotifyService
     {
         return Cache::remember(
             $this->getTrackCacheKey($artist, $trackTitle),  // cache key
-            3600,                                            // seconds to remember the key for
+            300,                                            // seconds to remember the key for
             function ()                                     // callback to populate the cache item
-            use ($accessToken, $artist, $trackTitle) {
-                return $this->searchTrackOnSpotifyUncached($accessToken, $artist, $trackTitle);
-            }
-        );
+                use ($accessToken, $artist, $trackTitle) {
+                    return $this->searchTrackOnSpotifyUncached($accessToken, $artist, $trackTitle);
+            });
     }
 
     private function getTrackCacheKey($artist, $trackTitle)
