@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\User;
 use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Cache;
 
 class SpotifyService
 {
@@ -71,6 +72,23 @@ class SpotifyService
     }
 
     public function searchTrackOnSpotify($accessToken, $artist, $trackTitle)
+    {
+        return Cache::remember(
+            $this->getTrackCacheKey($artist, $trackTitle),  // cache key
+            3600,                                            // seconds to remember the key for
+            function ()                                     // callback to populate the cache item
+            use ($accessToken, $artist, $trackTitle) {
+                return $this->searchTrackOnSpotifyUncached($accessToken, $artist, $trackTitle);
+            }
+        );
+    }
+
+    private function getTrackCacheKey($artist, $trackTitle)
+    {
+        return "$artist.$trackTitle";
+    }
+
+    public function searchTrackOnSpotifyUncached($accessToken, $artist, $trackTitle)
     {
         $headers = [
             'Authorization' => 'Bearer ' . $accessToken,

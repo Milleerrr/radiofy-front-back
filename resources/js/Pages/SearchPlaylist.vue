@@ -326,7 +326,7 @@ watchEffect(() => {
 
                 <div class="mt-5 giphy-image">
                     <img :src="giphyImage" />
-                </div>˝
+                </div>
             </div>
         </div>
 

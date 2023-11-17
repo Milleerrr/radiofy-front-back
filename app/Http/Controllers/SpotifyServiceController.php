@@ -129,7 +129,7 @@ class SpotifyServiceController extends Controller
 
     public function retrieveSongInfo(Request $request)
     {
-
+        // TODO - input validation
         $songs = $request->input('songs');
         $accessToken = $this->spotifyService->getSpotifyAccessToken(Auth::user());
         $tracksInfo = [];
