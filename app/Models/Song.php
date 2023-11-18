@@ -9,9 +9,13 @@ class Song extends Model
 {
     use HasFactory;
 
-    public function playlists()
-    {
-        // Assumes your pivot table is named 'playlist_song'
+    public function artists() {
+        // This will reference the pivot table 'artist_song'
+        return $this->belongsToMany(Artist::class, 'artist_song');
+    }
+    
+    public function playlists() {
+        // This will reference the pivot table 'playlist_song'
         return $this->belongsToMany(Playlist::class, 'playlist_song');
     }
 }
