@@ -15,15 +15,41 @@ class SpotifyServiceController extends Controller
         $this->spotifyService = $spotifyService;
     }
 
+    // Using getSpotifyAccessToken method
+    // public function retrieveSongInfo(Request $request)
+    // {
+    //     // I need input validation
+    //     $songs = $request->input('songs');
+    //     $accessToken = $this->spotifyService->getSpotifyAccessToken(Auth::user());
+    //     $tracksInfo = [];
+
+    //     foreach ($songs as $song) {
+    //         $track = $this->spotifyService->searchTrackOnSpotify($accessToken, $song['artist'], $song['trackTitle']);
+
+    //         if ($track) {
+    //             // If the track is found, add it to the tracks info array
+    //             $tracksInfo[] = $track;
+    //         } else {
+    //             // If a track is not found, you might want to handle it differently.
+    //             // For this example, we'll just add a message indicating failure.
+    //             $tracksInfo[] = ['message' => 'Track not found', 'artist' => $song['artist'], 'trackTitle' => $song['trackTitle']];
+    //         }
+    //     }
+
+    //     // Return the array of track information
+    //     return response()->json($tracksInfo);
+    // }
+
+    // Using getSpotifyAccessTokenForService method
     public function retrieveSongInfo(Request $request)
     {
         // I need input validation
-        $songs = $request->input('songs');
-        $accessToken = $this->spotifyService->getSpotifyAccessToken(Auth::user());
+        $songs = $request->input('scraped_songs');
+        $accessToken = $this->spotifyService->getSpotifyAccessTokenForService();
         $tracksInfo = [];
 
         foreach ($songs as $song) {
-            $track = $this->spotifyService->searchTrackOnSpotify($accessToken, $song['artist'], $song['trackTitle']);
+            $track = $this->spotifyService->searchTrackOnSpotify($accessToken, $song['artist'], $song['title']);
 
             if ($track) {
                 // If the track is found, add it to the tracks info array
@@ -31,7 +57,7 @@ class SpotifyServiceController extends Controller
             } else {
                 // If a track is not found, you might want to handle it differently.
                 // For this example, we'll just add a message indicating failure.
-                $tracksInfo[] = ['message' => 'Track not found', 'artist' => $song['artist'], 'trackTitle' => $song['trackTitle']];
+                $tracksInfo[] = ['message' => 'Track not found', 'artist' => $song['artist'], 'trackTitle' => $song['title']];
             }
         }
 

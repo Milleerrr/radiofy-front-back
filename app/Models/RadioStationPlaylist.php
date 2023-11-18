@@ -5,10 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Playlist extends Model
+class RadioStationPlaylist extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'playlist_id',
+        'primary_title',
+        'secondary_title',
+        'image_url',
+        'synopsis',
+        'link'
+    ];
     public function songs() {
         // This will reference the pivot table 'playlist_song'
         return $this->belongsToMany(Song::class, 'playlist_song');

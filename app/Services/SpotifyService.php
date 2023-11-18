@@ -44,6 +44,26 @@ class SpotifyService
         return $user->spotify_token;
     }
 
+
+    public function getSpotifyAccessTokenForService()
+    {
+        // Use a service account's refresh token to get a new access token
+        $refreshToken = env('SPOTIFY_SERVICE_ACCOUNT_REFRESH_TOKEN');
+
+        $response = $this->client->request('POST', 'https://accounts.spotify.com/api/token', [
+            'form_params' => [
+                'grant_type' => 'refresh_token',
+                'refresh_token' => $refreshToken,
+                'client_id' => env('SPOTIFY_CLIENT_ID'),
+                'client_secret' => env('SPOTIFY_CLIENT_SECRET'),
+            ],
+        ]);
+
+        $newToken = json_decode($response->getBody()->getContents(), true);
+
+        return $newToken['access_token'];
+    }
+
     public function createPlaylist(User $user, $playlistName)
     {
         $accessToken = $this->getSpotifyAccessToken($user);
