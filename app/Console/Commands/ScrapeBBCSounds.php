@@ -42,17 +42,7 @@ class ScrapeBBCSounds extends Command
                 // Simulate a request to get programme tracks
                 $tracksRequest = new Request(['link' => $programme['link']]);
                 $tracks = $bbcSoundsController->getProgrammeTracks($tracksRequest);
-
-                // Process and save tracks as needed
-                // foreach ($tracks->original['scraped_songs'] as $track) {
-                //     Song::create([
-                //         'programme_id' => $programme['id'], // Assuming you extract the ID as before
-                //         'artist' => $track['artist'],
-                //         'title' => $track['title'],
-                //         'playlistCreated' => $formattedDate,
-                //         // ... other fields ...
-                //     ]);
-                // }
+ 
                 $songsData = $tracks->original['scraped_songs']; 
 
                 // Created a  Request instance with this data as 
