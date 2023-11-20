@@ -92,54 +92,111 @@ const setSelectedProgramme = (programme) => {
     selectedProgramme.value = programme;
 };
 
-
-// Srcape the songs of the selected programme and save them to scrapedSongs
-// const scrapeSongsFromProgramme = async () => {
-//     if (!selectedProgramme.value) {
-//         console.error('No programme selected');
-//         return;
-//     }
-
-//     try {
-//         // Assuming '/api/scrape-songs' is your endpoint for scraping songs from a given URL
-//         const response = await axios.post('/scrape-songs', {
-//             link: selectedProgramme.value.link
-//         });
-
-//         scrapedSongs.value = response.data.scraped_songs;
-//     } catch (error) {
-//         console.error('Error scraping songs:', error.response.data);
-//     }
-// };
-
 // When the user clicks the search button, call scrapeSongsFromProgramme to scrape the songs.
 // Then search the songs on Spotify to retrieve the songs objects
 const searchSongs = async () => {
     if (selectedProgramme.value) {
         // Hide schedule
         schedule.value = false;
-        // Show song list
-        songList.value = true;
 
         try {
-            const playlistId = extractProgrammeId(selectedProgramme.value.link);
+            const playlistId = extractProgrammeId(selectedProgramme.value.playlistDetails.link);
             const response = await axios.get('/api/schedule/programme/details', {
                 params: { playlist_id: playlistId }
             });
-            songs.value = response.data; // Assuming the response data is structured correctly
+
+            // Check if the response and data property exist
+            if (response && response.data) {
+                songs.value = response.data.songs.map(song => ({ ...song, checked: false }));
+                console.log(songs.value);
+                // Show song list
+                songList.value = true;
+            } else {
+                // Handle the case where response does not have a data property
+                throw new Error('No data returned from the API');
+            }
         } catch (error) {
-            console.error('Error fetching songs and artists:', error.response.data);
+            console.error('Error fetching songs and artists:', error.response ? error.response.data : error);
+            songList.value = false;
         }
     } else {
         console.error('No programme selected');
     }
 };
 
+
 // Helper function to extract programme ID from the URL
 function extractProgrammeId(link) {
     const parts = link.split('/');
     return parts[parts.length - 1];
 }
+
+// Adds the selected songs the ther users Spotify account. It takes the playlist name
+// songs array and passes that to Spotify to create a playlist and populate it with songs
+const addToSpotify = async () => {
+
+    if (songs.value.length === 0) return failAlert();
+    // Filter the songs that are checked
+    const tracksToAdd = songs.value.filter(song => song.checked);
+
+    try {
+
+        getRandomGif();
+
+        isSaving.value = true;
+
+        await axios.post('api/spotify/add-to-spotify', {
+            playlistName: playlistName.value,
+            tracks: tracksToAdd,
+        });
+
+        isSaving.value = false;
+        // Use SweetAlert to show a success message
+        successAlert();
+
+    } catch (error) {
+        console.error('Error adding to Spotify:', error.response.data);
+        isSaving.value = false;
+        // Use SweetAlert to show an error message
+        failAlert();
+    }
+};
+
+// Updates the checked property of each song when clicked on
+const updateCheckedState = (songToUpdate, isChecked) => {
+    const song = songs.value.find(s => s.spotify_uri === songToUpdate.spotify_uri);
+    if (song) {
+        song.checked = isChecked;
+    }
+};
+
+
+// Checks if playlist name is empty
+const checkPlaylistNameIsNotEmpty = () => {
+    if (!playlistName.value) {
+        return failAlert();
+    }
+}
+
+// Function to toggle select all/deselect all songs an updates the checked property
+const checkAll = () => {
+    isCheckAll.value = !isCheckAll.value;
+    songs.value.forEach(song => {
+        song.checked = isCheckAll.value;
+    });
+};
+
+// Function to update the check all state based on individual song selections
+const updateCheckall = () => {
+    isCheckAll.value = songs.value.every(song => song.checked);
+};
+
+// Watch effect to update 'isCheckAll' when 'songs' change
+watchEffect(() => {
+    updateCheckall();
+});
+
+// UNUSED FUNCTIONS PENDING DELETION
 
 // const retrieveSongInfo = async () => {
 
@@ -177,71 +234,24 @@ function extractProgrammeId(link) {
 //     }
 // };
 
+// Srcape the songs of the selected programme and save them to scrapedSongs
+// const scrapeSongsFromProgramme = async () => {
+//     if (!selectedProgramme.value) {
+//         console.error('No programme selected');
+//         return;
+//     }
 
-// Adds the selected songs the ther users Spotify account. It takes the playlist name
-// songs array and passes that to Spotify to create a playlist and populate it with songs
-const addToSpotify = async () => {
+//     try {
+//         // Assuming '/api/scrape-songs' is your endpoint for scraping songs from a given URL
+//         const response = await axios.post('/scrape-songs', {
+//             link: selectedProgramme.value.link
+//         });
 
-    if (songs.value.length === 0) return failAlert();
-    // Filter the songs that are checked
-    const tracksToAdd = songs.value.filter(song => song.checked);
-
-    try {
-
-        getRandomGif();
-
-        isSaving.value = true;
-
-        await axios.post('api/spotify/add-to-spotify', {
-            playlistName: playlistName.value,
-            tracks: tracksToAdd,
-        });
-
-        isSaving.value = false;
-        // Use SweetAlert to show a success message
-        successAlert();
-
-    } catch (error) {
-        console.error('Error adding to Spotify:', error.response.data);
-        isSaving.value = false;
-        // Use SweetAlert to show an error message
-        failAlert();
-    }
-};
-
-// Updates the checked property of each song when clicked on
-const updateCheckedState = (song, isChecked) => {
-    // Find the song in the songs array and update its checked property
-    const songToUpdate = songs.value.find(s => s.id === song.id);
-    if (songToUpdate) {
-        songToUpdate.checked = isChecked;
-    }
-};
-
-// Checks if playlist name is empty
-const checkPlaylistNameIsNotEmpty = () => {
-    if (!playlistName.value) {
-        return failAlert();
-    }
-}
-
-// Function to toggle select all/deselect all songs an updates the checked property
-const checkAll = () => {
-    isCheckAll.value = !isCheckAll.value;
-    songs.value.forEach((song) => {
-        song.checked = isCheckAll.value;
-    });
-};
-
-// Function to update the check all state based on individual song selections
-const updateCheckall = () => {
-    isCheckAll.value = songs.value.every(song => song.checked);
-};
-
-// Watch effect to update 'isCheckAll' when 'songs' change
-watchEffect(() => {
-    updateCheckall();
-});
+//         scrapedSongs.value = response.data.scraped_songs;
+//     } catch (error) {
+//         console.error('Error scraping songs:', error.response.data);
+//     }
+// };
 
 </script>
 
@@ -324,19 +334,25 @@ watchEffect(() => {
             </div>
 
             <div v-if="songList">
-                <SearchPlaylistCards v-for="song in songs" :key="song.id" :title="song.title" :artists="song.artist"
-                    :imageUrl="song.imageUrl" :audioUrl="song.previewUrl" :checked="song.checked"
+                <SearchPlaylistCards v-for="song in songs" 
+                    :key="song.spotify_uri" 
+                    :title="song.title" 
+                    :artists="song.artists"
+                    :imageUrl="song.image_url" 
+                    :audioUrl="song.audio_url" 
+                    :checked="song.checked"
                     @update:checked="updateCheckedState(song, $event)" />
             </div>
 
             <div v-if="schedule" :class="{ 'has-selection': selectedProgramme }">
                 <BBCProgrammeCards v-for="programme in programmeList" 
-                    :key="programme.playlistDetails.link" 
+                    :key="programme.playlistDetails.link"
+                    :link="programme.playlistDetails.link" 
                     :title="programme.playlistDetails.primary_title"
-                    :secondaryTitle="programme.playlistDetails.secondary_title" 
+                    :secondaryTitle="programme.playlistDetails.secondary_title"
                     :synopsis="programme.playlistDetails.synopsis" 
-                    :image="programme.playlistDetails.image_url" 
-                    :isSelected="selectedProgramme === programme"
+                    :image="programme.playlistDetails.image_url"
+                    :isSelected="selectedProgramme === programme" 
                     @checked="setSelectedProgramme(programme)" />
             </div>
 

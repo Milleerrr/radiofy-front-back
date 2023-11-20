@@ -6,6 +6,7 @@ const props = defineProps({
     title: String,
     secondaryTitle: String,
     synopsis: String,
+    link: String,
     isSelected: Boolean,
 });
 
@@ -20,6 +21,7 @@ const checkProgramme = () => {
         secondaryTitle: props.secondaryTitle,
         synopsis: props.synopsis,
         isSelected: props.isSelected,
+        link: props.link,
     });
 };
 

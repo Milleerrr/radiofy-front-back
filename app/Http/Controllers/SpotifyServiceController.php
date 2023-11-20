@@ -126,7 +126,7 @@ class SpotifyServiceController extends Controller
         $tracks = $request->input('tracks');
 
         // Extract URIs from the track objects
-        $trackUris = array_column($tracks, 'spotifyUri');
+        $trackUris = array_column($tracks, 'spotify_uri');
 
         // Filter out any empty URIs just in case
         $trackUris = array_filter($trackUris);
@@ -159,19 +159,19 @@ class SpotifyServiceController extends Controller
         ]);
     }
 
-    public function addTracks(Request $request)
-    {
-        $user = Auth::user();
-        $accessToken = $this->spotifyService->getSpotifyAccessToken($user);
-        $playlistId = $request->input('playlist_id');
-        $trackUris = $request->input('track_uris');
+    // public function addTracks(Request $request)
+    // {
+    //     $user = Auth::user();
+    //     $accessToken = $this->spotifyService->getSpotifyAccessToken($user);
+    //     $playlistId = $request->input('playlist_id');
+    //     $trackUris = $request->input('track_uris');
 
-        $result = $this->spotifyService->addTracksToPlaylist($accessToken, $playlistId, $trackUris);
+    //     $result = $this->spotifyService->addTracksToPlaylist($accessToken, $playlistId, $trackUris);
 
-        if ($result) {
-            return response()->json(['message' => 'Tracks added successfully']);
-        } else {
-            return response()->json(['message' => 'An error occurred'], 500);
-        }
-    }
+    //     if ($result) {
+    //         return response()->json(['message' => 'Tracks added successfully']);
+    //     } else {
+    //         return response()->json(['message' => 'An error occurred'], 500);
+    //     }
+    // }
 }

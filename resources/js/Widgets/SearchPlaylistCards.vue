@@ -1,9 +1,9 @@
 <script setup>
-import { ref, defineProps, defineEmits, watchEffect } from 'vue';
+import { ref, defineProps, defineEmits, watchEffect, computed } from 'vue';
 
 const props = defineProps({
     title: String,
-    artists: String,
+    artists: Array,
     imageUrl: String,
     audioUrl: String,
     checked: Boolean,
@@ -14,9 +14,14 @@ const emits = defineEmits(['update:checked']);
 // Use 'checked' prop with v-model
 const isChecked = ref(props.checked);
 
+const formattedArtists = computed(() => {
+  return props.artists.join(', ');
+});
+
 watchEffect(() => {
     isChecked.value = props.checked;
 });
+
 
 </script>
 
@@ -25,16 +30,16 @@ watchEffect(() => {
         <div class="card border shadow bg-body rounded w-100 mx-auto" style="max-width: 740px;">
             <div class="row g-0">
                 <div class="col-md-4">
-                    <img :src="props.imageUrl" class="img-fluid rounded" alt="Song image">
+                    <img :src="imageUrl" class="img-fluid rounded" alt="Song image">
                 </div>
                 <div class="col-md-7">
                     <div class="card-body">
-                        <h5 class="card-title">{{ props.title }}</h5>
-                        <p class="card-text"><small class="text-muted">{{ props.artists }}</small></p>
-                        <div v-if="props.audioUrl" class="mt-2">
+                        <h5 class="card-title">{{ title }}</h5>
+                        <p class="card-text"><small class="text-muted">{{ formattedArtists }}</small></p>
+                        <div v-if="audioUrl" class="mt-2">
                             <!-- Adjust audio player width on larger screens -->
                             <audio controls class="w-100 md:w-auto">
-                                <source type="audio/mp3" :src="props.audioUrl">
+                                <source type="audio/mp3" :src="audioUrl">
                                 Your browser does not support the audio element.
                             </audio>
                         </div>
@@ -46,7 +51,7 @@ watchEffect(() => {
                 <div class="col-md-1 d-flex align-items-center justify-content-center">
                     <div class="checkbox-wrapper-12">
                         <div class="cbx">
-                            <input :id="props.id" type="checkbox" v-model="isChecked"
+                            <input :id="props.id" type="checkbox" checked v-model="isChecked"
                                 @change="$emit('update:checked', $event.target.checked)" />
                             <label :for="props.id"></label>
                             <svg width="30" height="30" viewBox="0 0 15 14" fill="none">
