@@ -2,51 +2,158 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\GetScheduleRequest;
 use Illuminate\Http\Request;
+use App\Models\RadioStationPlaylist;
+use App\Models\Song;
+use App\Models\Artist;
 use Symfony\Component\DomCrawler\Crawler;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
+use App\Services\SpotifyService;
+
 
 class BBCSoundsController extends Controller
 {
-    public function getSchedule(Request $request)
+
+    protected $spotifyService;
+
+    public function __construct(SpotifyService $spotifyService)
     {
-        $station = $request->input('station');
-        $date = $request->input('date');
-
+        $this->spotifyService = $spotifyService;
+    }
+    public function getSchedule(GetScheduleRequest $request)
+    {
         // Validate the inputs
-        $request->validate([
-            'station' => 'required|string',
-            'date' => 'required|date',
+        $validated = $request->validated();
+        $station = $validated['station'];
+        $date = $validated['date'];
+
+        
+        // Attempt to find the playlist by the provided station and date
+        $playlistId = $this->getRadioStationSchedule($station, $date);
+        $playlist = RadioStationPlaylist::with('songs.artists')
+            ->where('playlist_id', $playlistId)
+            ->firstOrFail();
+
+        // Convert the playlist and related models to the appropriate structure for the frontend
+        $programmesInfo = $this->formatProgrammes($playlist);
+        return response([
+            'playlistExists' => true,
+            'programme_list' => $programmesInfo,
         ]);
+    }
 
-        // Format the date to match the required format by the BBC website
-        // (Assuming you have some date formatting logic here)
-
+    protected function getRadioStationSchedule($station, $date)
+    {
         // Build the URL to fetch the schedule
         $url = "https://www.bbc.co.uk/sounds/schedules/bbc_{$station}/{$date}";
-
-        // Fetch the HTML content
         $response = Http::get($url);
-        if ($response->successful()) {
-            $htmlContent = $response->body();
-
-            // Parse the HTML content
-            $parsedContent = $this->parseScheduleContent($htmlContent); // Make sure this is the correct method name
-
-            // Return the parsed content data
-            // Use JSON_UNESCAPED_SLASHES to prevent escaping slashes in URLs
-            return response()->json([
-                'programme_list' => $parsedContent
-            ], 200, [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        } else {
-            // Handle the error appropriately
-            return response()->json([
-                'error' => 'Unable to fetch the schedule from BBC Sounds.'
-            ], 500);
+    
+        if (!$response->successful()) {
+            throw new \Exception('Unable to fetch the schedule from BBC Sounds.');
         }
+    
+        $htmlContent = $response->body();
+        $programmeData = $this->parseScheduleContent($htmlContent);
+    
+        $playlistIds = [];
+    
+        foreach ($programmeData as $programme) {
+            // Extract the programme ID and store it in the array with a key
+            $playlistIds[] = [
+                'playlist_id' => $this->extractProgrammeId($programme['link'])
+            ];
+        }
+    
+        return $playlistIds; // Make sure to return the result
+    }
+    
+
+    protected function scrapeAndSaveSchedule($station, $date)
+    {
+        // Build the URL to fetch the schedule
+        $url = "https://www.bbc.co.uk/sounds/schedules/{$station}/{$date}";
+        $response = Http::get($url);
+
+        if (!$response->successful()) {
+            throw new \Exception('Unable to fetch the schedule from BBC Sounds.');
+        }
+
+        $htmlContent = $response->body();
+        $programmeData = $this->parseScheduleContent($htmlContent);
+
+        foreach ($programmeData as $programme) {
+            $playlist = RadioStationPlaylist::create([
+                'playlist_id' => $this->extractProgrammeId($programme['link']),
+                'primary_title' => $programme['title'],
+                'secondary_title' => $programme['secondaryTitle'],
+                'image_url' => $programme['image'],
+                'synopsis' => $programme['synopsis'],
+                'link' => $programme['link'],
+            ]);
+
+            $tracksRequest = new Request(['link' => $programme['link']]);
+            $tracksResponse = $this->getProgrammeTracks($tracksRequest);
+            $tracksData = $tracksResponse->getData(true)['scraped_songs'];
+
+            foreach ($tracksData as $trackData) {
+                $spotifyTracksInfo = $this->spotifyService->searchTrackOnSpotify($trackData['artist'], $trackData['title']);
+
+                foreach ($spotifyTracksInfo as $trackInfo) {
+                    if (isset($trackInfo['id'], $trackInfo['name'])) {
+                        $song = Song::updateOrCreate([
+                            'spotify_song_id' => $trackInfo['id'],
+                        ], [
+                            'title' => $trackInfo['name'],
+                            'spotify_uri' => $trackInfo['uri'],
+                            'image_url' => $trackInfo['album']['images'][0]['url'] ?? null,
+                            'audio_url' => $trackInfo['preview_url'] ?? null,
+                        ]);
+
+                        $playlist->songs()->syncWithoutDetaching($song->id);
+
+                        foreach ($trackInfo['artists'] as $spotifyArtist) {
+                            $artist = Artist::updateOrCreate([
+                                'spotify_artist_id' => $spotifyArtist['id'],
+                            ], [
+                                'name' => $spotifyArtist['name'],
+                            ]);
+
+                            $song->artists()->syncWithoutDetaching($artist->id);
+                        }
+                    }
+                }
+            }
+        }
+
+        return $playlist->load('songs.artists');
+
+    }
+    // Helper function to format the programmes for JSON response
+    protected function formatProgrammes($playlist)
+    {
+        // Initialize an array to hold the formatted programmes
+        $formattedProgrammes = [];
+
+        // Now include the details of the playlist itself
+        $formattedProgrammes['playlistDetails'] = [
+            'playlist_id' => $playlist->playlist_id,
+            'primary_title' => $playlist->primary_title,
+            'secondary_title' => $playlist->secondary_title,
+            'image_url' => $playlist->image_url,
+            'synopsis' => $playlist->synopsis,
+            'link' => $playlist->link,
+        ];
+
+        // Return the formatted programmes
+        return $formattedProgrammes;
+    }
+
+    // Helper function to extract programme ID from URL
+    protected function extractProgrammeId($link)
+    {
+        $parts = explode('/', $link);
+        return end($parts);
     }
 
     public function parseScheduleContent($htmlContent)
@@ -101,7 +208,7 @@ class BBCSoundsController extends Controller
         $response = Http::get($url);
 
         $urlParts = explode('/', $url);
-        $programmeId = end($urlParts); 
+        $programmeId = end($urlParts);
 
         if ($response->successful()) {
             $htmlContent = $response->body();
@@ -171,5 +278,35 @@ class BBCSoundsController extends Controller
         }
 
         return $tracksData;
+    }
+
+    public function fetchSongsAndArtists(Request $request)
+    {
+        // Validate the request parameters
+        $validated = $request->validate([
+            'playlist_id' => 'required|string',
+        ]);
+
+        $playlistId = $validated['playlist_id'];
+
+        // Fetch the playlist with its songs and artists
+        $playlist = RadioStationPlaylist::with(['songs.artists'])
+            ->where('playlist_id', $playlistId)
+            ->firstOrFail();
+
+        // Transform the songs and their artists into a structure suitable for the frontend
+        $songsDetails = $playlist->songs->map(function ($song) {
+            return [
+                'title' => $song->title,
+                'spotify_uri' => $song->spotify_uri,
+                'image_url' => $song->image_url,
+                'audio_url' => $song->audio_url,
+                'artists' => $song->artists->pluck('name'), // Just sending artist names
+            ];
+        });
+
+        return response()->json([
+            'songs' => $songsDetails,
+        ]);
     }
 }

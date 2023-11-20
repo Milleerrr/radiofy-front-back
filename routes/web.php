@@ -54,7 +54,13 @@ Route::get('/login/google', [LoginController::class, 'redirectToGoogle'])
 
 Route::get('/login/spotify/callback', [LoginController::class, 'redirectToSpotifyCallback']);
 
-Route::get('/get-schedule', [BBCSoundsController::class, 'getSchedule']);
+// Route::get('/get-schedule', [BBCSoundsController::class, 'getSchedule']);
 
-Route::any('/scrape-songs', [BBCSoundsController::class, 'getProgrammeTracks']);
+if (app()->environment('local'))
+{
+    Route::get('/phpinfo', function () {
+        phpinfo();
+    });
+}
+
 

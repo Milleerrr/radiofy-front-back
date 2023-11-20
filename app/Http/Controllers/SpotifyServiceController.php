@@ -45,11 +45,10 @@ class SpotifyServiceController extends Controller
     {
         // I need input validation
         $songs = $request->input('scraped_songs');
-        $accessToken = $this->spotifyService->getSpotifyAccessTokenForService();
         $tracksInfo = [];
 
         foreach ($songs as $song) {
-            $track = $this->spotifyService->searchTrackOnSpotify($accessToken, $song['artist'], $song['title']);
+            $track = $this->spotifyService->searchTrackOnSpotify($song['artist'], $song['title']);
 
             if ($track) {
                 // If the track is found, add it to the tracks info array

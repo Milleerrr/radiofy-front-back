@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Console\Command;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Arr;
 
 class ScrapeBBCSounds extends Command
 {
@@ -77,6 +78,7 @@ class ScrapeBBCSounds extends Command
         $formattedDate = $date->toDateString();
 
         // Simulate a request to get the schedule for the current date
+        // TODO
         $request = new Request(['station' => $station, 'date' => $formattedDate]);
         $schedule = $bbcSoundsController->getSchedule($request);
 
@@ -153,11 +155,8 @@ class ScrapeBBCSounds extends Command
     protected function createOrUpdateSong($spotifyTrack)
     {
         // First, check if the 'album' key and 'images' key exist and if it has at least one image
-        $imageUrl = null;
-        if (isset($spotifyTrack['album']['images']) && count($spotifyTrack['album']['images']) > 0) {
-            $imageUrl = $spotifyTrack['album']['images'][0]['url'];
-        }
-    
+        $imageUrl = Arr::get($spotifyTrack, 'album.images.0');
+
         return Song::updateOrCreate(
             [
                 'spotify_song_id' => $spotifyTrack['id'],

@@ -60,21 +60,36 @@ async function getRandomGif() {
 
 // Returns selected radio station programme list, user can then select from the list 
 // which programme they want to save to their Spotify account
+// Inside your Vue component
+
 const getSchedule = async () => {
     schedule.value = true;
     songList.value = false;
     try {
-        const response = await axios.get('/get-schedule', {
+        const response = await axios.get(route('api.schedule.index'), {
             params: {
                 station: selectedStation.value,
                 date: date.value
             }
-        });
-        programmeList.value = response.data.programme_list;
+        })
+
+        console.log(response.data.programme_list.playlistDetails);
+
+        if (response.data.playlistExists) {
+            // Display the existing programme details
+            programmeList.value = [response.data.programme_list.playlistDetails];
+            
+        } else {
+            // Display the new programmes that were scraped and saved
+            programmeList.value = [response.data.newProgrammes];
+        }
+
+        schedule.value = true;
     } catch (error) {
         console.error('Error fetching schedule:', error.response.data);
     }
 };
+
 
 // Binds to each BBCProgrammeCards component. When clicked, it will save the details of the 
 // card to a variable called selectedProgramme. This is then used later for scraping the songs
@@ -84,23 +99,23 @@ const setSelectedProgramme = (programme) => {
 
 
 // Srcape the songs of the selected programme and save them to scrapedSongs
-const scrapeSongsFromProgramme = async () => {
-    if (!selectedProgramme.value) {
-        console.error('No programme selected');
-        return;
-    }
+// const scrapeSongsFromProgramme = async () => {
+//     if (!selectedProgramme.value) {
+//         console.error('No programme selected');
+//         return;
+//     }
 
-    try {
-        // Assuming '/api/scrape-songs' is your endpoint for scraping songs from a given URL
-        const response = await axios.post('/scrape-songs', {
-            link: selectedProgramme.value.link
-        });
+//     try {
+//         // Assuming '/api/scrape-songs' is your endpoint for scraping songs from a given URL
+//         const response = await axios.post('/scrape-songs', {
+//             link: selectedProgramme.value.link
+//         });
 
-        scrapedSongs.value = response.data.scraped_songs;
-    } catch (error) {
-        console.error('Error scraping songs:', error.response.data);
-    }
-};
+//         scrapedSongs.value = response.data.scraped_songs;
+//     } catch (error) {
+//         console.error('Error scraping songs:', error.response.data);
+//     }
+// };
 
 // When the user clicks the search button, call scrapeSongsFromProgramme to scrape the songs.
 // Then search the songs on Spotify to retrieve the songs objects
@@ -110,50 +125,62 @@ const searchSongs = async () => {
         schedule.value = false;
         // Show song list
         songList.value = true;
-        // Wait for songs to be scraped then call retrieveSongInfo
-        await scrapeSongsFromProgramme();
-        retrieveSongInfo();
+
+        try {
+            const playlistId = extractProgrammeId(selectedProgramme.value.link);
+            const response = await axios.get('/api/schedule/programme/details', {
+                params: { playlist_id: playlistId }
+            });
+            songs.value = response.data; // Assuming the response data is structured correctly
+        } catch (error) {
+            console.error('Error fetching songs and artists:', error.response.data);
+        }
     } else {
         console.error('No programme selected');
     }
 };
 
+// Helper function to extract programme ID from the URL
+function extractProgrammeId(link) {
+    const parts = link.split('/');
+    return parts[parts.length - 1];
+}
 
-const retrieveSongInfo = async () => {
+// const retrieveSongInfo = async () => {
 
-    try {
-        getRandomGif();
-        isLoading.value = true;
+//     try {
+//         getRandomGif();
+//         isLoading.value = true;
 
-        // Make a single request with all songs
-        const spotifyResponse = await axios.post('/api/spotify/retrieve-song-info', {
-            songs: scrapedSongs.value.map(song => ({
-                artist: song.artist,
-                trackTitle: song.title,
-            })),
-        });
+//         // Make a single request with all songs
+//         const spotifyResponse = await axios.post('/api/spotify/retrieve-song-info', {
+//             songs: scrapedSongs.value.map(song => ({
+//                 artist: song.artist,
+//                 trackTitle: song.title,
+//             })),
+//         });
 
-        // Assume spotifyResponse.data is an array of song details corresponding to each song
-        const trackDetails = spotifyResponse.data.map((songDetails, index) => ({
-            ...scrapedSongs.value[index],
-            checked: true,
-            imageUrl: songDetails.album.images[0].url,
-            artists: songDetails.artists.map(artist => artist.name),
-            title: songDetails.name,
-            previewUrl: songDetails.preview_url,
-            spotifyUri: songDetails.uri,
-        }));
+//         // Assume spotifyResponse.data is an array of song details corresponding to each song
+//         const trackDetails = spotifyResponse.data.map((songDetails, index) => ({
+//             ...scrapedSongs.value[index],
+//             checked: true,
+//             imageUrl: songDetails.album.images[0].url,
+//             artists: songDetails.artists.map(artist => artist.name),
+//             title: songDetails.name,
+//             previewUrl: songDetails.preview_url,
+//             spotifyUri: songDetails.uri,
+//         }));
 
-        // Update the songs array with the returned objects for each song
-        songs.value = trackDetails;
+//         // Update the songs array with the returned objects for each song
+//         songs.value = trackDetails;
 
-        isLoading.value = false;
-    } catch (error) {
-        // Handle errors
-        isLoading.value = false;
-        console.error('Error retrieving song info:', error.response.data);
-    }
-};
+//         isLoading.value = false;
+//     } catch (error) {
+//         // Handle errors
+//         isLoading.value = false;
+//         console.error('Error retrieving song info:', error.response.data);
+//     }
+// };
 
 
 // Adds the selected songs the ther users Spotify account. It takes the playlist name
@@ -308,9 +335,13 @@ watchEffect(() => {
             </div>
 
             <div v-if="schedule" :class="{ 'has-selection': selectedProgramme }">
-                <BBCProgrammeCards v-for="programme in programmeList" :key="programme.link" :title="programme.title"
-                    :secondaryTitle="programme.secondaryTitle" :synopsis="programme.synopsis" :link="programme.link"
-                    :image="programme.image" :isSelected="selectedProgramme === programme"
+                <BBCProgrammeCards v-for="programme in programmeList" 
+                    :key="programme.link" 
+                    :title="programme.primary_title"
+                    :secondaryTitle="programme.secondary_title" 
+                    :synopsis="programme.synopsis" 
+                    :image="programme.image_url" 
+                    :isSelected="selectedProgramme === programme"
                     @checked="setSelectedProgramme(programme)" />
             </div>
 

@@ -91,14 +91,14 @@ class SpotifyService
         return $playlist['id']; // Return the id of the playlist object
     }
 
-    public function searchTrackOnSpotify($accessToken, $artist, $trackTitle)
+    public function searchTrackOnSpotify($artist, $trackTitle)
     {
         return Cache::remember(
             $this->getTrackCacheKey($artist, $trackTitle),  // cache key
             3600,                                            // seconds to remember the key for
             function ()                                     // callback to populate the cache item
-            use ($accessToken, $artist, $trackTitle) {
-                return $this->searchTrackOnSpotifyUncached($accessToken, $artist, $trackTitle);
+            use ($artist, $trackTitle) {
+                return $this->searchTrackOnSpotifyUncached($this->getSpotifyAccessTokenForService(), $artist, $trackTitle);
             }
         );
     }
