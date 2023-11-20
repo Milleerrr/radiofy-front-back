@@ -63,7 +63,7 @@ async function getRandomGif() {
 // Inside your Vue component
 
 const getSchedule = async () => {
-    schedule.value = true;
+    schedule.value = false;
     songList.value = false;
     try {
         const response = await axios.get(route('api.schedule.index'), {
@@ -71,24 +71,19 @@ const getSchedule = async () => {
                 station: selectedStation.value,
                 date: date.value
             }
-        })
+        });
+        // Since the backend now always returns an array of programmes, 
+        // we assign it directly to programmeList.value
 
-        console.log(response.data.programme_list.playlistDetails);
+        programmeList.value = response.data.programme_list;
 
-        if (response.data.playlistExists) {
-            // Display the existing programme details
-            programmeList.value = [response.data.programme_list.playlistDetails];
-            
-        } else {
-            // Display the new programmes that were scraped and saved
-            programmeList.value = [response.data.newProgrammes];
-        }
-
-        schedule.value = true;
+        schedule.value = true; // Set to false after loading is complete
     } catch (error) {
         console.error('Error fetching schedule:', error.response.data);
+        schedule.value = false; // Ensure to set loading to false even if there's an error
     }
 };
+
 
 
 // Binds to each BBCProgrammeCards component. When clicked, it will save the details of the 
@@ -336,11 +331,11 @@ watchEffect(() => {
 
             <div v-if="schedule" :class="{ 'has-selection': selectedProgramme }">
                 <BBCProgrammeCards v-for="programme in programmeList" 
-                    :key="programme.link" 
-                    :title="programme.primary_title"
-                    :secondaryTitle="programme.secondary_title" 
-                    :synopsis="programme.synopsis" 
-                    :image="programme.image_url" 
+                    :key="programme.playlistDetails.link" 
+                    :title="programme.playlistDetails.primary_title"
+                    :secondaryTitle="programme.playlistDetails.secondary_title" 
+                    :synopsis="programme.playlistDetails.synopsis" 
+                    :image="programme.playlistDetails.image_url" 
                     :isSelected="selectedProgramme === programme"
                     @checked="setSelectedProgramme(programme)" />
             </div>

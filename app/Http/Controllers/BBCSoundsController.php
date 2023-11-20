@@ -28,17 +28,33 @@ class BBCSoundsController extends Controller
         $station = $validated['station'];
         $date = $validated['date'];
 
-        
-        // Attempt to find the playlist by the provided station and date
-        $playlistId = $this->getRadioStationSchedule($station, $date);
-        $playlist = RadioStationPlaylist::with('songs.artists')
-            ->where('playlist_id', $playlistId)
-            ->firstOrFail();
+        // Attempt to find all playlist IDs for the provided station and date
+        $playlistIds = $this->getRadioStationSchedule($station, $date);
 
-        // Convert the playlist and related models to the appropriate structure for the frontend
-        $programmesInfo = $this->formatProgrammes($playlist);
+        $programmesInfo = [];
+
+        foreach ($playlistIds as $playlistIdArray) {
+            $playlistId = $playlistIdArray['playlist_id'];
+
+            // Try to find the playlist by playlist_id, without throwing an exception if not found
+            $playlist = RadioStationPlaylist::with('songs.artists')
+                ->where('playlist_id', $playlistId)
+                ->first();
+
+            // If the playlist doesn't exist, scrape and save the schedule
+            if (!$playlist) {
+                // $playlist = $this->scrapeAndSaveSchedule($station, $date);
+                $playlist = null;
+            }
+
+            // Check if playlist is not null after attempting to scrape and save
+            if ($playlist) {
+                // Convert the playlist and related models to the appropriate structure for the frontend
+                $programmesInfo[] = $this->formatProgrammes($playlist);
+            }
+        }
+
         return response([
-            'playlistExists' => true,
             'programme_list' => $programmesInfo,
         ]);
     }
@@ -48,31 +64,31 @@ class BBCSoundsController extends Controller
         // Build the URL to fetch the schedule
         $url = "https://www.bbc.co.uk/sounds/schedules/bbc_{$station}/{$date}";
         $response = Http::get($url);
-    
+
         if (!$response->successful()) {
             throw new \Exception('Unable to fetch the schedule from BBC Sounds.');
         }
-    
+
         $htmlContent = $response->body();
         $programmeData = $this->parseScheduleContent($htmlContent);
-    
+
         $playlistIds = [];
-    
+
         foreach ($programmeData as $programme) {
             // Extract the programme ID and store it in the array with a key
             $playlistIds[] = [
                 'playlist_id' => $this->extractProgrammeId($programme['link'])
             ];
         }
-    
+
         return $playlistIds; // Make sure to return the result
     }
-    
+
 
     protected function scrapeAndSaveSchedule($station, $date)
     {
         // Build the URL to fetch the schedule
-        $url = "https://www.bbc.co.uk/sounds/schedules/{$station}/{$date}";
+        $url = "https://www.bbc.co.uk/sounds/schedules/bbc_{$station}/{$date}";
         $response = Http::get($url);
 
         if (!$response->successful()) {
@@ -127,7 +143,6 @@ class BBCSoundsController extends Controller
         }
 
         return $playlist->load('songs.artists');
-
     }
     // Helper function to format the programmes for JSON response
     protected function formatProgrammes($playlist)
