@@ -170,14 +170,6 @@ const updateCheckedState = (songToUpdate, isChecked) => {
     }
 };
 
-
-// Checks if playlist name is empty
-const checkPlaylistNameIsNotEmpty = () => {
-    if (!playlistName.value) {
-        return failAlert();
-    }
-}
-
 // Function to toggle select all/deselect all songs an updates the checked property
 const checkAll = () => {
     isCheckAll.value = !isCheckAll.value;
@@ -195,63 +187,6 @@ const updateCheckall = () => {
 watchEffect(() => {
     updateCheckall();
 });
-
-// UNUSED FUNCTIONS PENDING DELETION
-
-// const retrieveSongInfo = async () => {
-
-//     try {
-//         getRandomGif();
-//         isLoading.value = true;
-
-//         // Make a single request with all songs
-//         const spotifyResponse = await axios.post('/api/spotify/retrieve-song-info', {
-//             songs: scrapedSongs.value.map(song => ({
-//                 artist: song.artist,
-//                 trackTitle: song.title,
-//             })),
-//         });
-
-//         // Assume spotifyResponse.data is an array of song details corresponding to each song
-//         const trackDetails = spotifyResponse.data.map((songDetails, index) => ({
-//             ...scrapedSongs.value[index],
-//             checked: true,
-//             imageUrl: songDetails.album.images[0].url,
-//             artists: songDetails.artists.map(artist => artist.name),
-//             title: songDetails.name,
-//             previewUrl: songDetails.preview_url,
-//             spotifyUri: songDetails.uri,
-//         }));
-
-//         // Update the songs array with the returned objects for each song
-//         songs.value = trackDetails;
-
-//         isLoading.value = false;
-//     } catch (error) {
-//         // Handle errors
-//         isLoading.value = false;
-//         console.error('Error retrieving song info:', error.response.data);
-//     }
-// };
-
-// Srcape the songs of the selected programme and save them to scrapedSongs
-// const scrapeSongsFromProgramme = async () => {
-//     if (!selectedProgramme.value) {
-//         console.error('No programme selected');
-//         return;
-//     }
-
-//     try {
-//         // Assuming '/api/scrape-songs' is your endpoint for scraping songs from a given URL
-//         const response = await axios.post('/scrape-songs', {
-//             link: selectedProgramme.value.link
-//         });
-
-//         scrapedSongs.value = response.data.scraped_songs;
-//     } catch (error) {
-//         console.error('Error scraping songs:', error.response.data);
-//     }
-// };
 
 </script>
 

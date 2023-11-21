@@ -34,7 +34,7 @@ class ScrapeBBCSounds extends Command
     // Handle fuction to get all programmes and songs from the past 30 days
     public function handle()
     {
-        $station = 'radio_one'; // This should be dynamically set as needed
+        $station = 'radio_one_dance'; // This should be dynamically set as needed
         $endDate = Carbon::today(); // End date is today
         $date = $endDate->copy()->subDays(30); // Start date is 30 days ago
 
