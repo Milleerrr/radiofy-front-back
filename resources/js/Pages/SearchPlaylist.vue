@@ -19,7 +19,6 @@ let isSaving = ref(false)
 let giphyImage = ref('');
 let programmeList = ref([]);
 let selectedProgramme = ref();
-let scrapedSongs = ref([]);
 let schedule = ref(false);
 let songList = ref(false);
 
@@ -107,7 +106,7 @@ const searchSongs = async () => {
 
             // Check if the response and data property exist
             if (response && response.data) {
-                songs.value = response.data.songs.map(song => ({ ...song, checked: false }));
+                songs.value = response.data.songs.map(song => ({ ...song, checked: true }));
                 console.log(songs.value);
                 // Show song list
                 songList.value = true;

@@ -51,7 +51,7 @@ watchEffect(() => {
                 <div class="col-md-1 d-flex align-items-center justify-content-center">
                     <div class="checkbox-wrapper-12">
                         <div class="cbx">
-                            <input :id="props.id" type="checkbox" checked v-model="isChecked"
+                            <input :id="props.id" type="checkbox" v-model="isChecked"
                                 @change="$emit('update:checked', $event.target.checked)" />
                             <label :for="props.id"></label>
                             <svg width="30" height="30" viewBox="0 0 15 14" fill="none">
