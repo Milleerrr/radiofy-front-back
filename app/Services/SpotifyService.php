@@ -121,7 +121,7 @@ class SpotifyService
 
         $searchResults = json_decode($response->getBody(), true);
 
-        return $searchResults['tracks']['items'][0] ?? null; // Return the first match or null if not found
+        return $searchResults['tracks']['items']; // Return the first match or null if not found
     }
 
     private function getTrackCacheKey($artist, $trackTitle)

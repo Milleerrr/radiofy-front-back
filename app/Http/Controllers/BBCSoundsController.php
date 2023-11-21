@@ -36,27 +36,20 @@ class BBCSoundsController extends Controller
         foreach ($playlistIds as $playlistIdArray) {
             $playlistId = $playlistIdArray['playlist_id'];
 
-            // Try to find the playlist by playlist_id, without throwing an exception if not found
+            // Find or create the playlist
             $playlist = RadioStationPlaylist::with('songs.artists')
                 ->where('playlist_id', $playlistId)
-                ->first();
+                ->firstOr(function () use ($station, $date, $playlistId) {
+                    return $this->scrapeAndSaveSchedule($station, $date, $playlistId);
+                });
 
-            // If the playlist doesn't exist, scrape and save the schedule
-            if (!$playlist) {
-                // $playlist = $this->scrapeAndSaveSchedule($station, $date);
-                $playlist = null;
-            }
-
-            // Check if playlist is not null after attempting to scrape and save
+            // Convert the playlist and related models to the appropriate structure for the frontend
             if ($playlist) {
-                // Convert the playlist and related models to the appropriate structure for the frontend
                 $programmesInfo[] = $this->formatProgrammes($playlist);
             }
         }
 
-        return response([
-            'programme_list' => $programmesInfo,
-        ]);
+        return response(['programme_list' => $programmesInfo]);
     }
 
     protected function getRadioStationSchedule($station, $date)
@@ -99,42 +92,62 @@ class BBCSoundsController extends Controller
         $programmeData = $this->parseScheduleContent($htmlContent);
 
         foreach ($programmeData as $programme) {
-            $playlist = RadioStationPlaylist::create([
-                'playlist_id' => $this->extractProgrammeId($programme['link']),
-                'primary_title' => $programme['title'],
-                'secondary_title' => $programme['secondaryTitle'],
-                'image_url' => $programme['image'],
-                'synopsis' => $programme['synopsis'],
-                'link' => $programme['link'],
-            ]);
+            $playlistId = $this->extractProgrammeId($programme['link']);
+
+            // Use updateOrCreate to avoid duplicate entries
+            $playlist = RadioStationPlaylist::updateOrCreate(
+                ['playlist_id' => $playlistId],
+                [
+                    'primary_title' => $programme['title'],
+                    'secondary_title' => $programme['secondaryTitle'],
+                    'image_url' => $programme['image'],
+                    'synopsis' => $programme['synopsis'],
+                    'link' => $programme['link'],
+                    // You might want to include other fields like 'updated_at'
+                    // 'updated_at' => now(),
+                ]
+            );
 
             $tracksRequest = new Request(['link' => $programme['link']]);
             $tracksResponse = $this->getProgrammeTracks($tracksRequest);
             $tracksData = $tracksResponse->getData(true)['scraped_songs'];
 
+            echo "Tracks Data for " . $programme['title'] . ": " . json_encode($tracksData) . "\n";
+
             foreach ($tracksData as $trackData) {
                 $spotifyTracksInfo = $this->spotifyService->searchTrackOnSpotify($trackData['artist'], $trackData['title']);
 
+                // Assuming $spotifyTracksInfo is an array of tracks
                 foreach ($spotifyTracksInfo as $trackInfo) {
-                    if (isset($trackInfo['id'], $trackInfo['name'])) {
+                    // Make sure to check for the 'id' and 'name' in the track info
+   
+                    if (isset($trackInfo['id'], $trackInfo['name'], $trackInfo['album']['images'][0]['url'])) {
+                            $imageUrl = $trackInfo['album']['images'][0]['url']; // Get the image URL
+                
+
+                        // Update or create the song in your database
                         $song = Song::updateOrCreate([
                             'spotify_song_id' => $trackInfo['id'],
                         ], [
                             'title' => $trackInfo['name'],
                             'spotify_uri' => $trackInfo['uri'],
-                            'image_url' => $trackInfo['album']['images'][0]['url'] ?? null,
+                            'image_url' => $imageUrl,
                             'audio_url' => $trackInfo['preview_url'] ?? null,
                         ]);
 
+                        // Sync the song with the playlist
                         $playlist->songs()->syncWithoutDetaching($song->id);
 
+                        // Iterate through each artist in the track's artist array
                         foreach ($trackInfo['artists'] as $spotifyArtist) {
+                            // Update or create the artist in your database
                             $artist = Artist::updateOrCreate([
                                 'spotify_artist_id' => $spotifyArtist['id'],
                             ], [
                                 'name' => $spotifyArtist['name'],
                             ]);
 
+                            // Sync the artist with the song
                             $song->artists()->syncWithoutDetaching($artist->id);
                         }
                     }
