@@ -10,7 +10,7 @@ use App\Models\Artist;
 use Symfony\Component\DomCrawler\Crawler;
 use Illuminate\Support\Facades\Http;
 use App\Services\SpotifyService;
-
+use Illuminate\Support\Facades\Log;
 
 class BBCSoundsController extends Controller
 {
@@ -40,7 +40,8 @@ class BBCSoundsController extends Controller
             $playlist = RadioStationPlaylist::with('songs.artists')
                 ->where('playlist_id', $playlistId)
                 ->firstOr(function () use ($station, $date, $playlistId) {
-                    return $this->scrapeAndSaveSchedule($station, $date, $playlistId);
+                    Log::info('Playlist not found: '. $playlistId);
+                    return $this->scrapeAndSaveSchedule($station, $date);
                 });
 
             // Convert the playlist and related models to the appropriate structure for the frontend
@@ -52,6 +53,36 @@ class BBCSoundsController extends Controller
         return response(['programme_list' => $programmesInfo]);
     }
 
+    public function getScheduleWihtoutScrape(GetScheduleRequest $request)
+    {
+        // Validate the inputs
+        $validated = $request->validated();
+        $station = $validated['station'];
+        $date = $validated['date'];
+
+        // Attempt to find all playlist IDs for the provided station and date
+        $playlistIds = $this->getRadioStationSchedule($station, $date);
+
+        $programmesInfo = [];
+
+        foreach ($playlistIds as $playlistIdArray) {
+            $playlistId = $playlistIdArray['playlist_id'];
+
+            // Find or create the playlist
+            $playlist = RadioStationPlaylist::with('songs.artists')
+                ->where('playlist_id', $playlistId)
+                ->firstOr(function () use ($playlistId) {
+                    Log::info('Playlist not found: '. $playlistId);
+                });
+
+            // Convert the playlist and related models to the appropriate structure for the frontend
+            if ($playlist) {
+                $programmesInfo[] = $this->formatProgrammes($playlist);
+            }
+        }
+
+        return response(['programme_list' => $programmesInfo]);
+    }
     protected function getRadioStationSchedule($station, $date)
     {
         // Build the URL to fetch the schedule
