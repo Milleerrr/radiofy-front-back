@@ -28,7 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
     })->name('api.name')->can('getName', User::class);
 
     // Route to check if a schedule exists and to retrieve it
-    Route::get('/schedule/check-and-retrieve', [BBCSoundsController::class, 'getScheduleWihtoutScrape'])
+    Route::get('/schedule/check-and-retrieve', [BBCSoundsController::class, 'getScheduleWithoutScrape'])
         ->name('api.schedule.index');
 
     // Route to retrieve songs and artists for a specific programme

@@ -22,6 +22,8 @@ let selectedProgramme = ref();
 let schedule = ref(false);
 let songList = ref(false);
 
+const maxDate = new Date().toISOString().split('T')[0]
+
 // Sweet alerts for success and fail 
 const failAlert = () => {
     return Swal.fire(
@@ -202,7 +204,7 @@ watchEffect(() => {
                         <!-- Radio Station Selector -->
                         <div class="mb-3">
                             <select v-model="selectedStation" class="form-select form-select-lg">
-                                <option disabled selected>Select a Radio Station</option>
+                                <option value="" disabled selected>Select a Radio Station</option>
                                 <option value="radio_one">Radio 1</option>
                                 <option value="radio_one_dance">Radio 1 Dance</option>
                                 <option value="radio_one_relax">Radio 1 Relax</option>
@@ -214,7 +216,7 @@ watchEffect(() => {
 
                         <!-- Date Picker -->
                         <div class="mb-3">
-                            <input id="startDate" class="form-control form-control-lg" type="date" v-model="date" />
+                            <input id="startDate" class="form-control form-control-lg" type="date" :max="maxDate" v-model="date" />
                         </div>
 
                         <!-- Playlist Name Input -->
