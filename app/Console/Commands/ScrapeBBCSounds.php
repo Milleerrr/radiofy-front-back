@@ -31,133 +31,75 @@ class ScrapeBBCSounds extends Command
         $this->bbcSoundsController = App::make(BBCSoundsController::class);
     }
 
-    // Handle fuction to get all programmes and songs from the past 30 days
-    // public function handle()
-    // {
-    //     $station = 'radio_one'; // This should be dynamically set as needed
-    //     $endDate = Carbon::today(); // End date is today
-    //     $date = $endDate->copy()->subDays(1); // Start date is 30 days ago
-
-    //     while ($date->lte($endDate)) {
-
-    //         // Create an instance of your custom request class
-    //         $getScheduleRequest = new GetScheduleRequest();
-
-    //         // Simulate filling the request with query parameters
-    //         $getScheduleRequest->merge([
-    //             'station' => $station,
-    //             'date' => $date->toDateString(),
-    //         ]);
-
-    //         // Create a validator with the request's rules
-    //         $validator = app('validator')->make($getScheduleRequest->all(), $getScheduleRequest->rules());
-
-    //         // If validation fails, handle it as required
-    //         if ($validator->fails()) {
-    //             // Return or handle the validation errors as needed
-    //             // You can log the errors or throw an exception
-    //             echo "Validation failed.\n";
-    //             $this->error('Validation errors: ' . implode(', ', $validator->errors()->all()));
-    //             return 1; // Or use your preferred error handling strategy
-    //         }
-
-    //         echo "Validation successful.\n";
-    //         // Manually set the validator instance on the request
-    //         $getScheduleRequest->setValidator($validator);
-
-    //         // Now the validated method can be safely called within your controller
-    //         $schedule = $this->bbcSoundsController->getSchedule($getScheduleRequest);
-    //         echo 'Schedule' . $schedule;
-
-    //         // Assuming $schedule is an array of programmes
-    //         foreach ($schedule->original['programme_list'] as $programme) {
-    //             // Simulate a request to get programme tracks
-    //             $tracksRequest = new Request(['link' => $programme['playlistDetails']['link']]);
-    //             $tracks = $this->bbcSoundsController->getProgrammeTracks($tracksRequest);
-
-    //             $songsData = $tracks->original['scraped_songs'];
-
-    //             // Created a  Request instance with this data as 
-    //             // retrieveSongInfo is expecting a request
-    //             $songsRequest = new Request(['scraped_songs' => $songsData]);
-
-    //             // Call the retrieveSongInfo method with the correct Request object
-    //             $spotifyTracks = $this->spotifyServiceController->retrieveSongInfo($songsRequest);
-    //             $this->processTracks($programme, $spotifyTracks);
-    //         }
-
-    //         // Increment the date by one day for the next iteration
-    //         $date->addDay();
-    //     }
-
-    //     $this->info('All programmes from the last 30 days have been scraped.');
-    // }
-
-   // Handle function to get the programmes and songs from the current date
+    //Handle fuction to get all programmes and songs from the past 30 days
     public function handle()
     {
-        echo "Starting to scrape programmes for today.\n";
-        $station = '1xtra'; // This should be dynamically set as needed
-        $date = Carbon::today(); // Only process the current day
-
-        // Create an instance of your custom request class
-        $getScheduleRequest = new GetScheduleRequest();
-
-        // Simulate filling the request with query parameters
-        $getScheduleRequest->merge([
-            'station' => $station,
-            'date' => $date->toDateString(),
-        ]);
-
-        // Create a validator with the request's rules
-        $validator = app('validator')->make($getScheduleRequest->all(), $getScheduleRequest->rules());
-
-        // If validation fails, handle it as required
-        if ($validator->fails()) {
-            // Return or handle the validation errors as needed
-            // You can log the errors or throw an exception
-            echo "Validation failed.\n";
-            $this->error('Validation errors: ' . implode(', ', $validator->errors()->all()));
-            return 1; // Or use your preferred error handling strategy
-        }
-
-        echo "Validation successful.\n";
-        // Manually set the validator instance on the request
-        $getScheduleRequest->setValidator($validator);
-
-        // Now the validated method can be safely called within your controller
-        $schedule = $this->bbcSoundsController->getSchedule($getScheduleRequest);
-
-        echo "Retrieved schedule, processing programmes." . $schedule;
-
-        // Assuming $schedule is an array of programmes
-        foreach ($schedule->original['programme_list'] as $programme) {
-            // Simulate a request to get programme tracks
-            $tracksRequest = new Request(['link' => $programme['playlistDetails']['link']]);
-            $tracks = $this->bbcSoundsController->getProgrammeTracks($tracksRequest);
-
-            $songsData = $tracks->original['scraped_songs'];
-
-            // Created a Request instance with this data as 
-            // retrieveSongInfo is expecting a request
-            $songsRequest = new Request(['scraped_songs' => $songsData]);
-
-            // Call the retrieveSongInfo method with the correct Request object
-            $spotifyTracksResponse = $this->spotifyServiceController->retrieveSongInfo($songsRequest);
-            if ($spotifyTracksResponse instanceof JsonResponse) {
-                $spotifyTracks = $spotifyTracksResponse->getData(true); // Convert JSON response to array
-                $this->processTracks($programme, $spotifyTracks);
-            } else {
-                // Handle unexpected response type
-                $this->error('Expected a JSON response, got something else.');
-                continue;
+        // Array of radio stations
+        $stations = ['radio_one', 'radio_one_dance', '1xtra', 'radio_two', 'radio_three'];
+    
+        // Iterate over each station
+        foreach ($stations as $station) {
+            $endDate = Carbon::today(); // End date is today
+            $date = $endDate->copy()->subDays(1); // Start date is yesterday
+    
+            // Loop through each day from yesterday until today
+            while ($date->lte($endDate)) {
+                $formattedDate = $date->toDateString();
+    
+                // Create an instance of your custom request class
+                $getScheduleRequest = new GetScheduleRequest();
+    
+                // Simulate filling the request with query parameters
+                $getScheduleRequest->merge([
+                    'station' => $station,
+                    'date' => $formattedDate,
+                ]);
+    
+                // Create a validator with the request's rules
+                $validator = app('validator')->make($getScheduleRequest->all(), $getScheduleRequest->rules());
+    
+                // If validation fails, handle it as required
+                if ($validator->fails()) {
+                    // Return or handle the validation errors as needed
+                    echo "Validation failed for station {$station} on date {$formattedDate}.\n";
+                    $this->error('Validation errors: ' . implode(', ', $validator->errors()->all()));
+                    continue; // Skip to the next date or station
+                }
+    
+                echo "Validation successful for station {$station} on date {$formattedDate}.\n";
+                // Manually set the validator instance on the request
+                $getScheduleRequest->setValidator($validator);
+    
+                // Now the validated method can be safely called within your controller
+                $schedule = $this->bbcSoundsController->getSchedule($getScheduleRequest);
+                echo 'Schedule' . $schedule;
+    
+                // Assuming $schedule is an array of programmes
+                foreach ($schedule->original['programme_list'] as $programme) {
+                    // Simulate a request to get programme tracks
+                    $tracksRequest = new Request(['link' => $programme['playlistDetails']['link']]);
+                    $tracks = $this->bbcSoundsController->getProgrammeTracks($tracksRequest);
+    
+                    $songsData = $tracks->original['scraped_songs'];
+    
+                    // Created a Request instance with this data as 
+                    // retrieveSongInfo is expecting a request
+                    $songsRequest = new Request(['scraped_songs' => $songsData]);
+    
+                    // Call the retrieveSongInfo method with the correct Request object
+                    $spotifyTracks = $this->spotifyServiceController->retrieveSongInfo($songsRequest);
+                    $this->processTracks($programme, $spotifyTracks);
+                }
+    
+                // Increment the date by one day for the next iteration
+                $date->addDay();
             }
+    
+            echo "All programmes for station {$station} have been scraped.\n";
         }
-
-        echo "Finished processing programmes.\n";
-        $this->info('Programmes for today have been scraped.');
-    }
-
+    
+        $this->info('All stations have been processed.');
+    }    
 
     protected function processTracks($programme, $spotifyTracks)
     {

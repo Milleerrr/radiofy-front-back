@@ -15,31 +15,6 @@ class SpotifyServiceController extends Controller
         $this->spotifyService = $spotifyService;
     }
 
-    // Using getSpotifyAccessToken method
-    // public function retrieveSongInfo(Request $request)
-    // {
-    //     // I need input validation
-    //     $songs = $request->input('songs');
-    //     $accessToken = $this->spotifyService->getSpotifyAccessToken(Auth::user());
-    //     $tracksInfo = [];
-
-    //     foreach ($songs as $song) {
-    //         $track = $this->spotifyService->searchTrackOnSpotify($accessToken, $song['artist'], $song['trackTitle']);
-
-    //         if ($track) {
-    //             // If the track is found, add it to the tracks info array
-    //             $tracksInfo[] = $track;
-    //         } else {
-    //             // If a track is not found, you might want to handle it differently.
-    //             // For this example, we'll just add a message indicating failure.
-    //             $tracksInfo[] = ['message' => 'Track not found', 'artist' => $song['artist'], 'trackTitle' => $song['trackTitle']];
-    //         }
-    //     }
-
-    //     // Return the array of track information
-    //     return response()->json($tracksInfo);
-    // }
-
     // Using getSpotifyAccessTokenForService method
     public function retrieveSongInfo(Request $request)
     {
@@ -137,27 +112,27 @@ class SpotifyServiceController extends Controller
 
         return response()->json(['message' => 'Playlist created and tracks added successfully']);
     }
-    public function createPlaylist(Request $request)
-    {
-        $user = Auth::user();
-        if (!$user) {
-            return response()->json(['message' => 'User not authenticated'], 401);
-        }
+    // public function createPlaylist(Request $request)
+    // {
+    //     $user = Auth::user();
+    //     if (!$user) {
+    //         return response()->json(['message' => 'User not authenticated'], 401);
+    //     }
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
+    //     $request->validate([
+    //         'name' => 'required|string|max:255',
+    //     ]);
 
-        $playlistName = $request->input('name');
+    //     $playlistName = $request->input('name');
 
-        // Call the service method to create a playlist
-        $createdPlaylistName = $this->spotifyService->createPlaylist($user, $playlistName);
+    //     // Call the service method to create a playlist
+    //     $createdPlaylistName = $this->spotifyService->createPlaylist($user, $playlistName);
 
-        return response()->json([
-            'message' => 'Playlist created successfully!',
-            'playlist_name' => $createdPlaylistName
-        ]);
-    }
+    //     return response()->json([
+    //         'message' => 'Playlist created successfully!',
+    //         'playlist_name' => $createdPlaylistName
+    //     ]);
+    // }
 
     // public function addTracks(Request $request)
     // {

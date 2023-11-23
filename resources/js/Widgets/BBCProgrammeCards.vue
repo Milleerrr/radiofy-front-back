@@ -40,6 +40,7 @@ const checkProgramme = () => {
               <h5 class="card-title">{{ props.title }}</h5> <!-- Title -->
               <p class="card-text"><small class="text-muted">{{ props.secondaryTitle }}</small></p> <!-- Secondary title -->
               <p class="card-text">{{ props.synopsis }}</p> <!-- Synopsis -->
+              <button class="btn btn-success btn-lg" type="button" @click="searchSongs">Search</button>
             </div>
           </div>
         </div>

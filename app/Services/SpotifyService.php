@@ -16,16 +16,15 @@ class SpotifyService
     }
 
     public function getSpotifyAccessToken(User $user)
-    {
-        // Check if the current access token is still valid
+    {        // Check if the current access token is still valid
         if ($user->tokenHasExpired()) {
             // Access token has expired, use the refresh token to get a new one
             $response = $this->client->request('POST', 'https://accounts.spotify.com/api/token', [
                 'form_params' => [
                     'grant_type' => 'refresh_token',
                     'refresh_token' => $user->spotify_refresh_token,
-                    'client_id' => env('SPOTIFY_CLIENT_ID'),
-                    'client_secret' => env('SPOTIFY_CLIENT_SECRET'),
+                    'client_id' => config('services.spotify.client_id'),
+                    'client_secret' => config('services.spotify.client_secret'),
                 ],
             ]);
 
@@ -47,22 +46,23 @@ class SpotifyService
 
     public function getSpotifyAccessTokenForService()
     {
-        // Use a service account's refresh token to get a new access token
-        $refreshToken = env('SPOTIFY_SERVICE_ACCOUNT_REFRESH_TOKEN');
-
         $response = $this->client->request('POST', 'https://accounts.spotify.com/api/token', [
             'form_params' => [
-                'grant_type' => 'refresh_token',
-                'refresh_token' => $refreshToken,
-                'client_id' => env('SPOTIFY_CLIENT_ID'),
-                'client_secret' => env('SPOTIFY_CLIENT_SECRET'),
+                'grant_type' => 'client_credentials',
+                'client_id' => config('services.spotify.client_id'),
+                'client_secret' => config('services.spotify.client_secret'),
             ],
+            'headers' => [
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/x-www-form-urlencoded'
+            ]
         ]);
 
         $newToken = json_decode($response->getBody()->getContents(), true);
 
         return $newToken['access_token'];
     }
+
 
     public function createPlaylist(User $user, $playlistName)
     {
@@ -136,12 +136,20 @@ class SpotifyService
             'Content-Type' => 'application/json',
         ];
 
-        $body = json_encode(['uris' => $trackUris]);
+        // Spotify only allows adding 100 tracks at a time
+        $chunks = array_chunk($trackUris, 100);
 
-        $response = $this->client->request('POST', "https://api.spotify.com/v1/playlists/{$playlistId}/tracks", [
-            'headers' => $headers,
-            'body' => $body,
-        ]);
+        foreach ($chunks as $chunk) {
+            $body = json_encode(['uris' => $chunk]);
+
+            $response = $this->client->request('POST', "https://api.spotify.com/v1/playlists/{$playlistId}/tracks", [
+                'headers' => $headers,
+                'body' => $body,
+            ]);
+
+            // Implement a delay between requests to avoid hitting rate limits
+            sleep(0.01); // Sleep for 0.01 seconds
+        }
 
         return json_decode($response->getBody()->getContents(), true);
     }
